@@ -1,5 +1,6 @@
 #include "Glad/glad.h"  // First, include Glad
 #include <GLFW/glfw3.h>  // Then include GLFW (if you're using it)
+
 #define STBI_MALLOC(sz) malloc(sz)
 #define STBI_FREE(p) free(p)
 #define STBI_REALLOC(p, sz) realloc(p, sz)
@@ -20,7 +21,6 @@
 #include <algorithm>
 
 #include "Texture.h"
-#include "Bullet.h"
 #include "TextRenderer.h"
 #include "shader.h"
 
@@ -29,8 +29,6 @@
 #include"Mesh.h"
 #include"Camera.h"
 #include"OBJLoader.h"
-#include"Chunk.h"
-#include"World.h"
 #include"Deimgui.h"
 #include"light.h"
 #include"SceneObject.h"
@@ -61,6 +59,8 @@ private:
     glm::mat4 projection = glm::mat4(1.0f);
 
     Timer t;
+
+    Deimgui ui;
 
     std::vector<float> rectVertices = 
         {
@@ -154,8 +154,10 @@ Engine::~Engine()
     lightShader.Init("Resources/light.vs", "Resources/light.fs");
     light.Init();
  }
+
  void Engine::initEverything()
  {
+    ui.init(window->GetNativeWindow());
     cubeMesh.Initc(cubeVertices, cubeIndices);
     player.mesh = &cubeMesh;
     
@@ -173,6 +175,12 @@ Engine::~Engine()
  void Engine::loop()
  {
     while (!window->ShouldClose()) {
+        ui.newFrame();
+
+
+        ui.basic();
+        
+
         render.SetClearColor(0.2f, 0.f, 0.5f, 1.0f);
         render.Clear();
 
@@ -200,9 +208,11 @@ Engine::~Engine()
 
             light.Render(view, projection);
   
+        ui.rendering();
 
         window->SwapBuffers();
         window->PollEvents();
+
     }
 
 }
@@ -211,5 +221,4 @@ Engine::~Engine()
     shaderInit();
     initEverything();
     loop();
-
  }
