@@ -1,0 +1,3 @@
+/home/dev/projects/opengl/engine/builc/CMakeFiles/cpp.dir
+/home/dev/projects/opengl/engine/builc/CMakeFiles/edit_cache.dir
+/home/dev/projects/opengl/engine/builc/CMakeFiles/rebuild_cache.dir

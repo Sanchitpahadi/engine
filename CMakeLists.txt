@@ -18,13 +18,15 @@ include_directories(
 
     ${CMAKE_SOURCE_DIR}/Engine/include
 
+    ${CMAKE_SOURCE_DIR}/src/include
+
+
 
 )
 
 
 set(SOURCES
     Engine/glad.c
-    Engine/main.cpp
     Engine/Window.cpp
     Engine/Camera.cpp
 
@@ -49,6 +51,11 @@ set(SOURCES
 
     imgui/backends/imgui_impl_glfw.cpp
     imgui/backends/imgui_impl_opengl3.cpp
+
+
+
+    src/main.cpp
+
 )
 
 add_executable(cpp ${SOURCES})

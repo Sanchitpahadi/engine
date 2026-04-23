@@ -35,7 +35,32 @@ void Renderer::DrawArrays(unsigned int vao, int count) const
     glDrawArrays(GL_TRIANGLES, 0, count);
 }
 
-void Renderer::DrawIndexed(unsigned int indexCount) const
+void Renderer::Draw(const Mesh& mesh) const
 {
-    glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, nullptr);
+    mesh.Bind();
+    glDrawElements(GL_TRIANGLES, mesh.GetIndexCount(), GL_UNSIGNED_INT, 0);
+}
+
+void Renderer::Draw(const SceneObject& obj, const SceneObject& light, const Camera& camera) const
+{
+    if (!obj.mesh || !obj.material) return;
+
+    obj.material->shader->use();
+
+    obj.material->shader->setMat4("model", obj.transform.GetMatrix());
+    obj.material->shader->setMat4("view", camera.GetViewMatrix());
+    obj.material->shader->setMat4("projection", camera.GetProjection());
+
+    std::cout<< "is it printing or not??\n"; 
+/*
+    obj.material->shader->setVec3("objectColor", obj.material->color);
+
+    // 🔥 REAL LIGHT DATA
+    obj.material->shader->setVec3("lightPos", light.transform.position);
+    obj.material->shader->setVec3("lightColor", light.material->color);
+
+    obj.material->shader->setVec3("viewPos", camera.Position);
+*/
+
+    Draw(*obj.mesh);
 }

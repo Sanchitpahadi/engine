@@ -1,6 +1,11 @@
 #pragma once
 #include <Glad/glad.h>
 
+#include "Mesh.h"
+#include "SceneObject.h"
+#include "Camera.h"
+
+
 class Renderer
 {
 public:
@@ -14,5 +19,7 @@ public:
     void SetViewport(int width, int height) const;
 
     void DrawArrays(unsigned int vao, int count) const;
-    void DrawIndexed(unsigned int indexCount) const;
+    void Draw(const Mesh& mesh)const;
+    void Draw(const SceneObject& obj, const SceneObject& light, const Camera& camera) const;
+
 };

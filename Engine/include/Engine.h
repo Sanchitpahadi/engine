@@ -1,5 +1,5 @@
-#include "Glad/glad.h"  // First, include Glad
-#include <GLFW/glfw3.h>  // Then include GLFW (if you're using it)
+#include "Glad/glad.h" 
+#include <GLFW/glfw3.h>
 
 #define STBI_MALLOC(sz) malloc(sz)
 #define STBI_FREE(p) free(p)
@@ -24,6 +24,7 @@
 #include "TextRenderer.h"
 #include "shader.h"
 
+
 #include"Window.hpp"
 #include"Renderer.h"
 #include"Mesh.h"
@@ -35,22 +36,28 @@
 #include "Timer.h"
 #include "FileBrowser.h"
 
+#include"transform.h"
+
 class Engine
 {
 private:
 
-    int height,width;
-    const char*title;
-    Window *window;
+    int height, width;
+
+    const char* title;
+
+    Window* window;
 
     Shader shader, lightShader;
 
-    Light light;
+    // Light light;
 
-    SceneObject player;
+    SceneObject player,light;
 
+    Mesh cubeMesh, lightCube;
 
-    Mesh cubeMesh,lightCube;
+    Material cubeMaterial;
+    Material lightMaterial;
     
     Renderer render;
 
@@ -63,23 +70,20 @@ private:
     Deimgui ui;
 
     std::vector<float> rectVertices = 
-        {
-            -0.5f,  0.5f, 0.0f,  0.0f, 1.0f,
-             0.5f,  0.5f, 0.0f,  1.0f, 1.0f,
-             0.5f, -0.5f, 0.0f,  1.0f, 0.0f,
-            -0.5f, -0.5f, 0.0f,  0.0f, 0.0f
-        };
+    {
+        -0.5f,  0.5f, 0.0f,  0.0f, 1.0f,
+         0.5f,  0.5f, 0.0f,  1.0f, 1.0f,
+         0.5f, -0.5f, 0.0f,  1.0f, 0.0f,
+        -0.5f, -0.5f, 0.0f,  0.0f, 0.0f
+    };
 
     std::vector<unsigned int> rectIndices = 
-        {
-            0, 1, 2,
-            2, 3, 0
-        };
+    {
+        0, 1, 2,
+        2, 3, 0
+    };
 
-
-        std::vector<float> cubeVertices = {
-        // pos(x,y,z)        uv(u,v)     normal(nx,ny,nz)
-        // Front face  (normal: 0, 0, 1)
+    std::vector<float> cubeVertices = {
         -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,  0.0f, 0.0f, 1.0f,
          0.5f,  0.5f,  0.5f,  1.0f, 1.0f,  0.0f, 0.0f, 1.0f,
          0.5f, -0.5f,  0.5f,  1.0f, 0.0f,  0.0f, 0.0f, 1.0f,
@@ -115,18 +119,18 @@ private:
          0.5f, -0.5f, -0.5f,  1.0f, 0.0f,  0.0f,-1.0f, 0.0f,
         -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,  0.0f,-1.0f, 0.0f,
     };
+
     std::vector<unsigned int> cubeIndices = {
-          0,  1,  2,  2,  3,  0,  // Front
-          4,  5,  6,  6,  7,  4,  // Back
-          8,  9, 10, 10, 11,  8,  // Left
-         12, 13, 14, 14, 15, 12,  // Right
-         16, 17, 18, 18, 19, 16,  // Top
-         20, 21, 22, 22, 23, 20,  // Bottom
+        0,  1,  2,  2,  3,  0,  // Front
+        4,  5,  6,  6,  7,  4,  // Back
+        8,  9, 10, 10, 11,  8,  // Left
+        12, 13, 14, 14, 15, 12,  // Right
+        16, 17, 18, 18, 19, 16,  // Top
+        20, 21, 22, 22, 23, 20,  // Bottom
     };
 
-
-
-
+    void UpdateSelectedObject();
+    void ApplyGameStateLogic();
 
 public:
     Engine(int w, int h, const char* title);
@@ -135,90 +139,173 @@ public:
     void initEverything();
     void run();
     void loop();
-
-
 };
 
 Engine::Engine(int w, int h, const char* ti)
-    :width(w),height(h),title(ti),
-    window(new Window(w,h,ti))
+    : width(w), height(h), title(ti),
+      window(new Window(w, h, ti))
 {
 }
 
 Engine::~Engine()
 {
 }
- void Engine::shaderInit()
- {
+
+void Engine::shaderInit()
+{
     shader.Init("Resources/shader.vs", "Resources/shader.fs");      
     lightShader.Init("Resources/light.vs", "Resources/light.fs");
-    light.Init();
- }
+  //  light.Init();
 
- void Engine::initEverything()
- {
+}
+
+void Engine::initEverything()
+{
     ui.init(window->GetNativeWindow());
-    cubeMesh.Initc(cubeVertices, cubeIndices);
-    player.mesh = &cubeMesh;
     
+    // Setup game state callbacks
+    
+    ui.GetGameState().onSave = [this]() { 
+        std::cout << "Engine: Saving scene to " << ui.GetGameState().currentScenePath << std::endl;
+        // after : Implement actual scene saving
+    };
+    
+    ui.GetGameState().onLoad = [this]() { 
+        std::cout << "Engine: Loading scene from " << ui.GetGameState().currentScenePath << std::endl;
+        // after: Implement actual scene loading
+    };
+    
+    ui.GetGameState().onNew = [this]() { 
+        std::cout << "Engine: Creating new scene..." << std::endl;
+        // Reset scene state
+        player.mesh = nullptr;
+        // after: Reset all game objects
+    };
+    
+    // Mesh
+    cubeMesh.Initc(cubeVertices, cubeIndices);
     lightCube.Initc(cubeVertices, cubeIndices);
-    light.mesh = &lightCube;
 
+
+
+    // Materials
+    cubeMaterial.shader = &shader;
+    cubeMaterial.color = glm::vec3(0.2f, 0.0f, 0.5f);
+
+    lightMaterial.shader = &lightShader;
+    lightMaterial.color = glm::vec3(1.0f);
+
+    // Scene Objects
+    player.mesh = &cubeMesh;
+    player.material = &cubeMaterial;
+    player.transform.position = glm::vec3(0.0f, 0.0f, 0.0f);
+
+    light.mesh = &lightCube;
+    light.material = &lightMaterial;
+    light.transform.position = glm::vec3(2.0f, 2.0f, 2.0f);
+
+    // Renderer
     render.Init();
 
+    // Camera
     camera.Position = glm::vec3(0.0f, 2.0f, 5.0f);
-    projection = glm::perspective(glm::radians(60.0f), 800.0f/600.0f, 0.1f, 1000.0f);
+    camera.SetProjection(60.0f, 800.0f/600.0f, 0.1f, 1000.0f);
+    glViewport(0, 0, width, height);
 
+}
 
- }
+// need to update
+void Engine::UpdateSelectedObject()
+{
+    int selectedID = ui.GetSelectedObjectID();
+    
+    if (selectedID == 0) {
+        std::cout << "Selected: Cube" << std::endl;
 
- void Engine::loop()
- {
+    } else if (selectedID == 1) {
+        std::cout << "Selected: Light" << std::endl;
+
+    } else if (selectedID == 2) {
+        std::cout << "Selected: Camera" << std::endl;
+
+    }
+}
+
+// ==================== HELPER: Apply game state changes ====================
+void Engine::ApplyGameStateLogic()
+{
+    auto& gameState = ui.GetGameState();
+    
+    // Handle play/pause/stop states
+    if (gameState.isPlaying) {
+        // Only update simulation if not paused
+        if (!gameState.isPaused) {
+            // after it works: Update your game objects here
+            float deltaTime = t.Delta();
+           // player.movement(*window, deltaTime);
+        } else {
+            // Paused - the main simulation will only be paused
+            std::cout << "Game paused" << std::endl;
+        }
+    } else {
+        // Game stopped - reset state
+        gameState.isPaused = false;
+    }
+}
+
+void Engine::loop()
+{
     while (!window->ShouldClose()) {
-        ui.newFrame();
-
-
-        ui.basic();
         
-
-        render.SetClearColor(0.2f, 0.f, 0.5f, 1.0f);
+        render.SetClearColor(0.0f, 1.0f, 0.0f, 1.0f); // bright green
         render.Clear();
 
+        float deltaTime = t.Delta();
 
-            float deltaTime = t.Delta();
-            camera.ProcessKeyboard(window->GetNativeWindow(), deltaTime);
+        // camera
+        camera.ProcessKeyboard(window->GetNativeWindow(), deltaTime);
+        glm::mat4 view = camera.GetViewMatrix();
 
-            glm::mat4 view = camera.GetViewMatrix();
-
-
-            shader.use();
-            shader.setMat4("view", view);
-            shader.setMat4("projection", projection);
-            shader.setMat4("model", glm::mat4(1.f));
-            shader.setVec3("objectColor", glm::vec3(0.2f, 0.f, 0.5f));
-            shader.setInt("texture0", 0);
-            light.UploadToShader(shader, camera.Position);
-
-            
+        // GAME LOGIC
+        if (ui.IsPlaying() && !ui.IsPaused()) {
+            player.transform.position.x += 1.0f * deltaTime; // test movement
+        }
+        shader.use();
 
 
-            cubeMesh.Draw();
-            player.movement(*window, deltaTime);
+        glm::mat4 model = glm::mat4(1.0f);
 
+        shader.setMat4("model", model);
 
-            light.Render(view, projection);
-  
-        ui.rendering();
+        shader.setVec3("objectColor", glm::vec3(0.5f, 0.0f, 1.0f));
+        shader.setVec3("lightColor", glm::vec3(1.0f));
+        shader.setVec3("lightPos", light.transform.position);
+        shader.setVec3("viewPos", camera.Position);
+
+        shader.setMat4("view", camera.GetViewMatrix());
+        shader.setMat4("projection", camera.GetProjection());
+        
+
+        cubeMesh.Bind();
+        render.Draw(cubeMesh);
+       
+        // ui rendering one
+        ui.newFrame();     
+        ui.basic();        
+        ui.rendering();    
+
+        UpdateSelectedObject();
+
+        ApplyGameStateLogic();
 
         window->SwapBuffers();
         window->PollEvents();
-
     }
-
 }
- void Engine::run()
- {
+
+void Engine::run()
+{
     shaderInit();
     initEverything();
     loop();
- }
+}
