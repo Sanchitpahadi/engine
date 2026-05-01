@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include "Glad/glad.h" 
 #include <GLFW/glfw3.h>
 
@@ -13,7 +15,6 @@
 #include <glm/gtc/matrix_transform.hpp> 
 #include <glm/gtc/type_ptr.hpp> 
 
-#include <iostream>
 #include <fstream>
 #include <sstream>
 #include <string>
@@ -24,15 +25,14 @@
 #include "TextRenderer.h"
 #include "shader.h"
 
-
+    
 #include"Window.hpp"
 #include"Renderer.h"
 #include"Mesh.h"
 #include"Camera.h"
 #include"OBJLoader.h"
 #include"Deimgui.h"
-#include"light.h"
-#include"SceneObject.h"
+#include"scene.h"
 #include "Timer.h"
 #include "FileBrowser.h"
 
@@ -48,16 +48,9 @@ private:
 
     Window* window;
 
-    Shader shader, lightShader;
+    Shader shader;
 
-    // Light light;
-
-    SceneObject player,light;
-
-    Mesh cubeMesh, lightCube;
-
-    Material cubeMaterial;
-    Material lightMaterial;
+    Scene scene;
     
     Renderer render;
 
@@ -137,8 +130,7 @@ public:
     ~Engine();
     void shaderInit();
     void initEverything();
-    void run();
-    void loop();
+    void loop(Scene &scene);
 };
 
 Engine::Engine(int w, int h, const char* ti)
@@ -151,16 +143,12 @@ Engine::~Engine()
 {
 }
 
-void Engine::shaderInit()
-{
-    shader.Init("Resources/shader.vs", "Resources/shader.fs");      
-    lightShader.Init("Resources/light.vs", "Resources/light.fs");
-  //  light.Init();
-
-}
 
 void Engine::initEverything()
 {
+
+    render.Init();
+
     ui.init(window->GetNativeWindow());
     
     // Setup game state callbacks
@@ -178,35 +166,9 @@ void Engine::initEverything()
     ui.GetGameState().onNew = [this]() { 
         std::cout << "Engine: Creating new scene..." << std::endl;
         // Reset scene state
-        player.mesh = nullptr;
         // after: Reset all game objects
     };
     
-    // Mesh
-    cubeMesh.Initc(cubeVertices, cubeIndices);
-    lightCube.Initc(cubeVertices, cubeIndices);
-
-
-
-    // Materials
-    cubeMaterial.shader = &shader;
-    cubeMaterial.color = glm::vec3(0.2f, 0.0f, 0.5f);
-
-    lightMaterial.shader = &lightShader;
-    lightMaterial.color = glm::vec3(1.0f);
-
-    // Scene Objects
-    player.mesh = &cubeMesh;
-    player.material = &cubeMaterial;
-    player.transform.position = glm::vec3(0.0f, 0.0f, 0.0f);
-
-    light.mesh = &lightCube;
-    light.material = &lightMaterial;
-    light.transform.position = glm::vec3(2.0f, 2.0f, 2.0f);
-
-    // Renderer
-    render.Init();
-
     // Camera
     camera.Position = glm::vec3(0.0f, 2.0f, 5.0f);
     camera.SetProjection(60.0f, 800.0f/600.0f, 0.1f, 1000.0f);
@@ -253,7 +215,7 @@ void Engine::ApplyGameStateLogic()
     }
 }
 
-void Engine::loop()
+void Engine::loop(Scene &scene)
 {
     while (!window->ShouldClose()) {
         
@@ -268,26 +230,10 @@ void Engine::loop()
 
         // GAME LOGIC
         if (ui.IsPlaying() && !ui.IsPaused()) {
-            player.transform.position.x += 1.0f * deltaTime; // test movement
         }
-        shader.use();
 
 
-        glm::mat4 model = glm::mat4(1.0f);
-
-        shader.setMat4("model", model);
-
-        shader.setVec3("objectColor", glm::vec3(0.5f, 0.0f, 1.0f));
-        shader.setVec3("lightColor", glm::vec3(1.0f));
-        shader.setVec3("lightPos", light.transform.position);
-        shader.setVec3("viewPos", camera.Position);
-
-        shader.setMat4("view", camera.GetViewMatrix());
-        shader.setMat4("projection", camera.GetProjection());
-        
-
-        cubeMesh.Bind();
-        render.Draw(cubeMesh);
+        render.Draw(scene,camera);
        
         // ui rendering one
         ui.newFrame();     
@@ -303,9 +249,3 @@ void Engine::loop()
     }
 }
 
-void Engine::run()
-{
-    shaderInit();
-    initEverything();
-    loop();
-}

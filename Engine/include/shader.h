@@ -83,7 +83,7 @@ public:
     }
 
 
-    void use()
+    void use() const
     {
           if (ID == 0) {
             std::cerr << "ERROR: Shader not initialized. Call Init() first!" << std::endl;

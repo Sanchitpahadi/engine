@@ -41,26 +41,32 @@ void Renderer::Draw(const Mesh& mesh) const
     glDrawElements(GL_TRIANGLES, mesh.GetIndexCount(), GL_UNSIGNED_INT, 0);
 }
 
-void Renderer::Draw(const SceneObject& obj, const SceneObject& light, const Camera& camera) const
+void Renderer::Draw(const Scene& scene, const Camera& camera) const
 {
-    if (!obj.mesh || !obj.material) return;
+    for (const auto& obj : scene.GetObjects())
+    {
+        if (!obj.mesh || !obj.material || !obj.material->shader)
+            continue;
 
-    obj.material->shader->use();
+        obj.material->shader->use();
 
-    obj.material->shader->setMat4("model", obj.transform.GetMatrix());
-    obj.material->shader->setMat4("view", camera.GetViewMatrix());
-    obj.material->shader->setMat4("projection", camera.GetProjection());
+        obj.material->shader->setMat4("model", obj.transform.GetMatrix());
+        obj.material->shader->setMat4("view", camera.GetViewMatrix());
+        obj.material->shader->setMat4("projection", camera.GetProjection());
 
-    std::cout<< "is it printing or not??\n"; 
-/*
-    obj.material->shader->setVec3("objectColor", obj.material->color);
+        /*
 
-    // 🔥 REAL LIGHT DATA
-    obj.material->shader->setVec3("lightPos", light.transform.position);
-    obj.material->shader->setVec3("lightColor", light.material->color);
+        shader.setVec3("objectColor", glm::vec3(0.5f, 0.0f, 1.0f));
+        shader.setVec3("lightColor", glm::vec3(1.0f));
+        shader.setVec3("lightPos", light.transform.position);
+        shader.setVec3("viewPos", camera.Position);
 
-    obj.material->shader->setVec3("viewPos", camera.Position);
-*/
+        shader.setMat4("view", camera.GetViewMatrix());
+        shader.setMat4("projection", camera.GetProjection());
+    
+        */
 
-    Draw(*obj.mesh);
+        obj.mesh->Bind();
+        Draw(*obj.mesh);
+    }
 }

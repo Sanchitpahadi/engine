@@ -2,7 +2,7 @@
 #include <Glad/glad.h>
 
 #include "Mesh.h"
-#include "SceneObject.h"
+#include "scene.h"
 #include "Camera.h"
 
 
@@ -20,6 +20,6 @@ public:
 
     void DrawArrays(unsigned int vao, int count) const;
     void Draw(const Mesh& mesh)const;
-    void Draw(const SceneObject& obj, const SceneObject& light, const Camera& camera) const;
+    void Draw(const Scene& scene, const Camera& camera) const;
 
 };
