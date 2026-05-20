@@ -12,9 +12,6 @@
 class SceneObject {
 public:
     glm::vec3 position = glm::vec3(0.f);
-
-    Transform transform;
-
     Mesh* mesh = nullptr;
     Material* material = nullptr;
     

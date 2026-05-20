@@ -2,28 +2,29 @@
 
 #include <vector>
 #include "SceneObject.h"
+#include <unordered_map>
+#include"MeshRendererComponent.h"
+
+
+
+using Entity = uint32_t;
+
 
 class Scene
 {
-private:
-    std::vector<SceneObject> objects;
-
 public:
-    SceneObject& CreateObject()
+    Entity CreateEntity()
     {
-        objects.emplace_back();
-        return objects.back();
+        Entity id = nextEntity++;
+        entities.push_back(id);
+        return id;
     }
 
-    // ✅ non-const version (modifiable)
-    std::vector<SceneObject>& GetObjects()
-    {
-        return objects;
-    }
+    // COMPONENT STORAGE
+    std::unordered_map<Entity, TransformComponent> transforms;
+    std::unordered_map<Entity, MeshRendererComponent> meshRenderers;
 
-    // ✅ const version (read-only)
-    const std::vector<SceneObject>& GetObjects() const
-    {
-        return objects;
-    }
+private:
+    Entity nextEntity = 0;
+    std::vector<Entity> entities;
 };

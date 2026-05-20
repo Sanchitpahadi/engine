@@ -1,6 +1,6 @@
 #pragma once
-#include"Window.hpp"
-#include"shader.h"
+#include "shader.h"
+#include <glm/glm.hpp>
 
 class Material {
 public:
@@ -14,22 +14,22 @@ public:
     void Bind(const glm::mat4& model,
               const glm::mat4& view,
               const glm::mat4& projection)
-    {
-        if (!shader) return;
+            {
+                    if (!shader) return;
 
-        shader->use();
+                shader->use();
 
-        shader->setMat4("model", model);
-        shader->setMat4("view", view);
-        shader->setMat4("projection", projection);
+                shader->setMat4("model", model);
+                shader->setMat4("view", view);
+                shader->setMat4("projection", projection);
 
-        // optional — only if your shaders expect it
-        shader->setVec3("objectColor", color);
+                shader->setVec3("objectColor", color);
 
-        if (useTexture) {
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, textureID);
-            shader->setInt("texture0", 0);
-        }
-    }
+                if (useTexture) {
+                    glActiveTexture(GL_TEXTURE0);
+                    glBindTexture(GL_TEXTURE_2D, textureID);
+                    shader->setInt("texture0", 0);
+                }
+            }
+
 };

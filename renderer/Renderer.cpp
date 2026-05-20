@@ -41,32 +41,22 @@ void Renderer::Draw(const Mesh& mesh) const
     glDrawElements(GL_TRIANGLES, mesh.GetIndexCount(), GL_UNSIGNED_INT, 0);
 }
 
+
 void Renderer::Draw(const Scene& scene, const Camera& camera) const
 {
-    for (const auto& obj : scene.GetObjects())
+    for (const auto& [entity, renderer] : scene.meshRenderers)
     {
-        if (!obj.mesh || !obj.material || !obj.material->shader)
+
+        auto it = scene.transforms.find(entity);
+        if (it == scene.transforms.end())
             continue;
 
-        obj.material->shader->use();
+        const TransformComponent& transform = it->second;
 
-        obj.material->shader->setMat4("model", obj.transform.GetMatrix());
-        obj.material->shader->setMat4("view", camera.GetViewMatrix());
-        obj.material->shader->setMat4("projection", camera.GetProjection());
-
-        /*
-
-        shader.setVec3("objectColor", glm::vec3(0.5f, 0.0f, 1.0f));
-        shader.setVec3("lightColor", glm::vec3(1.0f));
-        shader.setVec3("lightPos", light.transform.position);
-        shader.setVec3("viewPos", camera.Position);
-
-        shader.setMat4("view", camera.GetViewMatrix());
-        shader.setMat4("projection", camera.GetProjection());
-    
-        */
-
-        obj.mesh->Bind();
-        Draw(*obj.mesh);
+        if (!renderer.mesh || !renderer.material || !renderer.material->shader)
+            continue;
+        renderer.material->Bind(transform.GetMatrix(),camera.GetViewMatrix(),camera.GetProjection());
+        Draw(*renderer.mesh);
     }
 }
+
