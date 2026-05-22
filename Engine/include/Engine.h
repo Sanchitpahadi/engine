@@ -62,6 +62,9 @@ private:
 
     Deimgui ui;
 
+    PhysicsSystem physics;
+
+
     std::vector<float> rectVertices = 
     {
         -0.5f,  0.5f, 0.0f,  0.0f, 1.0f,
@@ -224,12 +227,14 @@ void Engine::loop(Scene &scene)
 
         float deltaTime = t.Delta();
 
-        // camera
         camera.ProcessKeyboard(window->GetNativeWindow(), deltaTime);
         glm::mat4 view = camera.GetViewMatrix();
 
         // GAME LOGIC
         if (ui.IsPlaying() && !ui.IsPaused()) {
+            
+            physics.Update(scene, deltaTime);
+
         }
 
 

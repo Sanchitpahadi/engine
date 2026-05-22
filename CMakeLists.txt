@@ -20,6 +20,7 @@ include_directories(
 
     ${CMAKE_SOURCE_DIR}/src/include
 
+    ${CMAKE_SOURCE_DIR}/physics
 
 
 )
@@ -55,6 +56,8 @@ set(SOURCES
 
 
     src/main.cpp
+
+    physics/Physics.cpp
 
 )
 

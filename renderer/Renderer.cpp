@@ -53,8 +53,10 @@ void Renderer::Draw(const Scene& scene, const Camera& camera) const
 
         const TransformComponent& transform = it->second;
 
-        if (!renderer.mesh || !renderer.material || !renderer.material->shader)
+        if (!renderer.mesh || !renderer.material || !renderer.material->shader) {
+            std::cout << "Missing mesh, material, or shader on entity " << entity << "\n";
             continue;
+        }
         renderer.material->Bind(transform.GetMatrix(),camera.GetViewMatrix(),camera.GetProjection());
         Draw(*renderer.mesh);
     }

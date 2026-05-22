@@ -1,20 +1,6 @@
 #include"Engine.h"
 
-struct AABB
-{
-    glm::vec3 min;
-    glm::vec3 max;
-};
 
-AABB GetAABB(const TransformComponent& t, glm::vec3 size)
-{
-    glm::vec3 half = (size * t.scale) * 0.5f;
-
-    return {
-        t.position - half,
-        t.position + half
-    };
-}
 
 int main()
  {
@@ -92,34 +78,42 @@ int main()
     
     e.initEverything();
 
+    
+
+    Entity ground = scene.CreateEntity();
+    Entity player = scene.CreateEntity();
+
     cubeMesh.Initc(cubeVertices, cubeIndices);
 
     cubeMaterial.shader = &shader;
     cubeMaterial.color = glm::vec3(0.2f, 0.0f, 0.5f);
 
-    Entity ground = scene.CreateEntity();
-    Entity player = scene.CreateEntity();
 
+    // initializing its material and transform material etc
     scene.transforms[ground] = TransformComponent{};
     scene.meshRenderers[ground] = MeshRendererComponent{};
 
-
-    
     scene.transforms[player] = TransformComponent{};
     scene.meshRenderers[player] = MeshRendererComponent{};
+    scene.physics[player] = PhysicsComponent{};
 
-    scene.transforms[ground].position = glm::vec3(0.0f, -1.0f, 0.0f);
-
-    scene.transforms[ground].scale = glm::vec3(10.0f, 0.5f, 10.0f);
     
-    scene.transforms[player].position = glm::vec3(0.0f);
-
+    // adding meshes or materials
     scene.meshRenderers[player].mesh = &cubeMesh;
     scene.meshRenderers[player].material = &cubeMaterial;
 
-    
     scene.meshRenderers[ground].mesh = &cubeMesh;
     scene.meshRenderers[ground].material = &cubeMaterial;
+    
+    // Aplying the initialized material 
+    scene.transforms[ground].position = glm::vec3(0.0f, -1.0f, 0.0f);
+    scene.transforms[ground].scale = glm::vec3(10.0f, 0.5f, 10.0f);
+
+    scene.transforms[player].position = glm::vec3(0.0f);
+
+    scene.ground = ground;
+
+
     
     e.loop(scene);
     

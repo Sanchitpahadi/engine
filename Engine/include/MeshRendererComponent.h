@@ -4,6 +4,7 @@
 
 class Material;
 class Mesh;
+
 struct MeshRendererComponent
 {
     Mesh* mesh = nullptr;

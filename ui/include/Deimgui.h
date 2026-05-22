@@ -12,7 +12,7 @@
 #include <glm/glm.hpp>
 #include <GLFW/glfw3.h>
 
-// ==================== GAME STATE ====================
+// GAME STATE
 struct GameState {
     bool isPlaying = false;
     bool isPaused = false;
@@ -41,7 +41,7 @@ struct GameState {
     }
 };
 
-// ==================== MAIN DEIMGUI CLASS ====================
+// MAIN DEIMGUI
 class Deimgui
 {
 private:
@@ -62,7 +62,7 @@ public:
         ImGui::DestroyContext();
     }
 
-    // ==================== INITIALIZATION ====================
+// Init
     void init(GLFWwindow* win) {
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
@@ -110,13 +110,13 @@ public:
         }
     }
 
-    // ==================== PUBLIC ACCESSORS ====================
+    //  PUBLIC ACCESSORS 
     GameState& GetGameState() { return gameState; }
     bool IsPlaying() const { return gameState.isPlaying; }
     bool IsPaused() const { return gameState.isPaused; }
     int GetSelectedObjectID() const { return gameState.selectedObjectID; }
 
-    // ==================== PRIVATE UI PANELS ====================
+    //  PRIVATE UI PANELS 
 
 private:
 
