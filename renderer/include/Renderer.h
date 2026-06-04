@@ -20,6 +20,6 @@ public:
 
     void DrawArrays(unsigned int vao, int count) const;
     void Draw(const Mesh& mesh)const;
-    void Draw(const Scene& scene, const Camera& camera) const;
+    void Draw(const Scene& scene, const Camera& camera,Entity selectedEntity) const;
 
 };

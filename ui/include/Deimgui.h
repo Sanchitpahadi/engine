@@ -4,6 +4,7 @@
 #include <vector>
 #include <iostream>
 #include <functional>
+#include <algorithm>
 
 #include "imgui.h"
 #include "backends/imgui_impl_glfw.h"
@@ -12,28 +13,29 @@
 #include <glm/glm.hpp>
 #include <GLFW/glfw3.h>
 
+// ─────────────────────────────────────────────────────────────────────────────
 // GAME STATE
+// ─────────────────────────────────────────────────────────────────────────────
 struct GameState {
-    bool isPlaying = false;
-    bool isPaused = false;
-    int selectedObjectID = -1;
+    Scene* scene = nullptr;
+
+    bool isPlaying        = false;
+    bool isPaused         = false;
+    int  selectedObjectID = -1;
     std::string currentScenePath = "Untitled";
-    
-    // Callbacks for external systems
+
     std::function<void()> onSave = nullptr;
     std::function<void()> onLoad = nullptr;
-    std::function<void()> onNew = nullptr;
-    
+    std::function<void()> onNew  = nullptr;
+
     void SaveScene() {
         std::cout << "[SAVED] Scene: " << currentScenePath << std::endl;
         if (onSave) onSave();
     }
-    
     void LoadScene() {
         std::cout << "[LOADED] Scene from disk" << std::endl;
         if (onLoad) onLoad();
     }
-    
     void NewScene() {
         selectedObjectID = -1;
         currentScenePath = "Untitled";
@@ -41,42 +43,38 @@ struct GameState {
     }
 };
 
-// MAIN DEIMGUI
+// ─────────────────────────────────────────────────────────────────────────────
+// DEIMGUI
+// ─────────────────────────────────────────────────────────────────────────────
 class Deimgui
 {
 private:
     GameState gameState;
-    
-    // Window visibility toggles
+
     bool showHierarchy = true;
     bool showInspector = true;
-    bool showStats = true;
-    bool showToolbar = true;
-    
+    bool showStats     = true;
+    bool showToolbar   = true;
+
 public:
     Deimgui() {}
-    
+
     ~Deimgui() {
         ImGui_ImplOpenGL3_Shutdown();
         ImGui_ImplGlfw_Shutdown();
         ImGui::DestroyContext();
     }
 
-// Init
+    // ── INIT ─────────────────────────────────────────────────────────────────
     void init(GLFWwindow* win) {
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
-        
+
         ImGuiIO& io = ImGui::GetIO();
-        
-        // Enable docking
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
         io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
-        // Optional: Enable multi-viewport for floating windows
-        // 
-        
+
         ImGui::StyleColorsDark();
-        
         ImGui_ImplGlfw_InitForOpenGL(win, true);
         ImGui_ImplOpenGL3_Init("#version 330");
     }
@@ -88,266 +86,257 @@ public:
     }
 
     void basic() {
-        // Setup docking area (invisible container)
         ShowDockspace();
-        
-        // Render UI panels
-        if (showToolbar) ShowToolbar();
+        if (showToolbar)   ShowToolbar();
         if (showHierarchy) ShowHierarchy();
         if (showInspector) ShowInspector();
-        if (showStats) ShowStats();
+        if (showStats)     ShowStats();
     }
 
     void rendering() {
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-        
+
         if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
-            GLFWwindow* backup_current_context = glfwGetCurrentContext();
+            GLFWwindow* backup = glfwGetCurrentContext();
             ImGui::UpdatePlatformWindows();
             ImGui::RenderPlatformWindowsDefault();
-            glfwMakeContextCurrent(backup_current_context);
+            glfwMakeContextCurrent(backup);
         }
     }
 
-    //  PUBLIC ACCESSORS 
-    GameState& GetGameState() { return gameState; }
-    bool IsPlaying() const { return gameState.isPlaying; }
-    bool IsPaused() const { return gameState.isPaused; }
-    int GetSelectedObjectID() const { return gameState.selectedObjectID; }
-
-    //  PRIVATE UI PANELS 
-
+    // ── PUBLIC ACCESSORS ─────────────────────────────────────────────────────
+    GameState& GetGameState()        { return gameState; }
+    bool IsPlaying()           const { return gameState.isPlaying; }
+    bool IsPaused()            const { return gameState.isPaused; }
+    int  GetSelectedObjectID() const { return gameState.selectedObjectID; }
+    
+    void SetSelectedEntity(Entity selectedEntity)
+    {
+        gameState.selectedObjectID = selectedEntity;
+    }
+// ─────────────────────────────────────────────────────────────────────────────
 private:
-
-    // DOCKSPACE - Invisible container for all panels
+// ─────────────────────────────────────────────────────────────────────────────
+    // ── DOCKSPACE ────────────────────────────────────────────────────────────
     void ShowDockspace() {
-        static bool dockspaceOpen = true;
-        
-        ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
-        
-        const ImGuiViewport* viewport = ImGui::GetMainViewport();
-        ImGui::SetNextWindowPos(viewport->WorkPos);
-        ImGui::SetNextWindowSize(viewport->WorkSize);
-        ImGui::SetNextWindowViewport(viewport->ID);
-        
-        // Hide all window decorations
-        window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse |
-                        ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
-        window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
-        
-        ImGui::Begin("DockSpace Master", &dockspaceOpen, window_flags);
-        
-        // Create docking area with PassthruCentralNode
-        // This allows mouse input to pass through to the viewport
-        ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
-        ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_PassthruCentralNode);
-        
+        static bool open = true;
+        ImGuiWindowFlags flags =
+            ImGuiWindowFlags_MenuBar        | ImGuiWindowFlags_NoDocking      |
+            ImGuiWindowFlags_NoTitleBar     | ImGuiWindowFlags_NoCollapse     |
+            ImGuiWindowFlags_NoResize       | ImGuiWindowFlags_NoMove         |
+            ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+
+        const ImGuiViewport* vp = ImGui::GetMainViewport();
+        ImGui::SetNextWindowPos(vp->WorkPos);
+        ImGui::SetNextWindowSize(vp->WorkSize);
+        ImGui::SetNextWindowViewport(vp->ID);
+
+        ImGui::Begin("DockSpace Master", &open, flags);
+        ImGui::DockSpace(ImGui::GetID("MyDockSpace"), ImVec2(0,0),
+                         ImGuiDockNodeFlags_PassthruCentralNode);
         ImGui::End();
     }
 
-    // TOOLBAR - Top button bar with Save/Load/Play controls
+    // ── TOOLBAR ──────────────────────────────────────────────────────────────
     void ShowToolbar() {
-        ImGuiViewport* viewport = ImGui::GetMainViewport();
-        ImGui::SetNextWindowPos(ImVec2(viewport->WorkPos.x, viewport->WorkPos.y));
-        ImGui::SetNextWindowSize(ImVec2(viewport->WorkSize.x, 50));
-        
-        ImGuiWindowFlags flags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize |
-                                 ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoDocking |
-                                 ImGuiWindowFlags_NoTitleBar;
-        
+        ImGuiViewport* vp = ImGui::GetMainViewport();
+        ImGui::SetNextWindowPos(ImVec2(vp->WorkPos.x, vp->WorkPos.y));
+        ImGui::SetNextWindowSize(ImVec2(vp->WorkSize.x, 50));
         ImGui::SetNextWindowBgAlpha(0.95f);
+
+        ImGuiWindowFlags flags =
+            ImGuiWindowFlags_NoMove    | ImGuiWindowFlags_NoResize  |
+            ImGuiWindowFlags_NoCollapse| ImGuiWindowFlags_NoDocking |
+            ImGuiWindowFlags_NoTitleBar;
+
         ImGui::Begin("##Toolbar", nullptr, flags);
         ImGui::SetCursorPosY(7);
-        
-        // FILE OPERATIONS
-        if (ImGui::Button("Save", ImVec2(70, 35))) {
-            gameState.SaveScene();
-        }
-        ImGui::SameLine(0, 10);
-        
-        if (ImGui::Button("Load", ImVec2(70, 35))) {
-            gameState.LoadScene();
-        }
-        ImGui::SameLine(0, 10);
-        
-        if (ImGui::Button("New", ImVec2(70, 35))) {
-            gameState.NewScene();
-        }
-        
-        // Separator - Fixed: use Separator() instead of SeparatorEx()
-        ImGui::SameLine(0, 20);
-        ImGui::Separator();
-        ImGui::SameLine(0, 20);
-        
-        // PLAYBACK CONTROLS
-        const char* playLabel = gameState.isPlaying ? "Playing" : "Play";
-        if (ImGui::Button(playLabel, ImVec2(70, 35))) {
+
+        if (ImGui::Button("Save", ImVec2(70,35))) gameState.SaveScene();
+        ImGui::SameLine(0,10);
+        if (ImGui::Button("Load", ImVec2(70,35))) gameState.LoadScene();
+        ImGui::SameLine(0,10);
+        if (ImGui::Button("New",  ImVec2(70,35))) gameState.NewScene();
+
+        ImGui::SameLine(0,20); ImGui::Separator(); ImGui::SameLine(0,20);
+
+        if (ImGui::Button(gameState.isPlaying ? "Playing" : "Play", ImVec2(70,35))) {
             gameState.isPlaying = !gameState.isPlaying;
             if (gameState.isPlaying) gameState.isPaused = false;
         }
-        ImGui::SameLine(0, 10);
-        
-        const char* pauseLabel = gameState.isPaused ? "Resume" : "Pause";
-        if (ImGui::Button(pauseLabel, ImVec2(70, 35))) {
+        ImGui::SameLine(0,10);
+        if (ImGui::Button(gameState.isPaused ? "Resume" : "Pause", ImVec2(70,35)))
             gameState.isPaused = !gameState.isPaused;
-        }
-        ImGui::SameLine(0, 10);
-        
-        if (ImGui::Button("Stop", ImVec2(70, 35))) {
+        ImGui::SameLine(0,10);
+        if (ImGui::Button("Stop", ImVec2(70,35))) {
             gameState.isPlaying = false;
-            gameState.isPaused = false;
+            gameState.isPaused  = false;
         }
-        
+
         ImGui::End();
     }
 
-    // HIERARCHY - Left panel showing scene objects
+    // ── HIERARCHY ────────────────────────────────────────────────────────────
     void ShowHierarchy() {
-        // Fixed: use SetNextWindowDockID() instead of SetNextWindowDocking()
-        ImGui::SetNextWindowDockID(ImGui::GetID("MyDockSpace"), ImGuiCond_FirstUseEver);
-        ImGui::SetNextWindowSize(ImVec2(250, 400), ImGuiCond_FirstUseEver);
-        
         ImGui::Begin("Hierarchy", &showHierarchy, ImGuiWindowFlags_NoCollapse);
-        
-        ImGui::Text("Scene Objects");
+
+        ImGui::Text("Scene: %s", gameState.currentScenePath.c_str());
         ImGui::Separator();
-        
-        // Tree structure - Fixed: use TreeNodeEx() instead of TreeNode() with flags
+
+        if (!gameState.scene) {
+            ImGui::TextDisabled("No scene loaded");
+            ImGui::End();
+            return;
+        }
+
+        ImGui::Text("Entities: %d", (int)gameState.scene->entities.size());
+
+        // ── Add entity input + button ─────────────────────────────────────
+        static char newName[64] = "Entity";
+        ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - 80.0f);
+        ImGui::InputText("##newname", newName, sizeof(newName));
+        ImGui::SameLine();
+        if (ImGui::Button("+ Add", ImVec2(-1, 0))) {
+            // Scene decides everything — ImGui just passes the name
+            Entity e = gameState.scene->CreateEntity(newName);
+            gameState.selectedObjectID = (int)e;
+            strncpy(newName, "Entity", sizeof(newName));
+        }
+
+        ImGui::Separator();
+
+        // ── Entity list ───────────────────────────────────────────────────
         if (ImGui::TreeNodeEx("Scene", ImGuiTreeNodeFlags_DefaultOpen)) {
-            
-            // Cube object
-            bool cubSelected = (gameState.selectedObjectID == 0);
-            if (ImGui::Selectable("Cube", &cubSelected)) {
-                gameState.selectedObjectID = 0;
+            Entity toDelete = (Entity)-1;
+
+            for (Entity e : gameState.scene->entities) {
+                const std::string& label = gameState.scene->names.count(e)
+                    ? gameState.scene->names[e]
+                    : "Entity " + std::to_string(e);
+
+                bool selected = (gameState.selectedObjectID == (int)e);
+                if (ImGui::Selectable(label.c_str(), selected))
+                    gameState.selectedObjectID = (int)e;
+
+                // Right-click menu — only scene operations, no component logic
+                if (ImGui::BeginPopupContextItem()) {
+                    ImGui::TextDisabled("%s", label.c_str());
+                    ImGui::Separator();
+                    if (ImGui::MenuItem("Delete"))
+                        toDelete = e;
+                    ImGui::EndPopup();
+                }
             }
-            
-            // Light object
-            bool lightSelected = (gameState.selectedObjectID == 1);
-            if (ImGui::Selectable("Light", &lightSelected)) {
-                gameState.selectedObjectID = 1;
+
+            // Defer deletion to avoid invalidating the loop iterator
+            if (toDelete != (Entity)-1) {
+                if (gameState.selectedObjectID == (int)toDelete)
+                    gameState.selectedObjectID = -1;
+                gameState.scene->DestroyEntity(toDelete);  // Scene owns this
             }
-            
-            // Camera object
-            bool camSelected = (gameState.selectedObjectID == 2);
-            if (ImGui::Selectable("Camera", &camSelected)) {
-                gameState.selectedObjectID = 2;
-            }
-            
+
             ImGui::TreePop();
         }
-        
+
         ImGui::End();
     }
 
-    // INSPECTOR - Right panel showing selected object properties
+    // ── INSPECTOR ────────────────────────────────────────────────────────────
+    // Pure display — reads whatever components the Scene has on this entity.
+    // ImGui never adds or removes components; Scene does that externally.
     void ShowInspector() {
-        // Fixed: use SetNextWindowDockID() instead of SetNextWindowDocking()
-        ImGui::SetNextWindowDockID(ImGui::GetID("MyDockSpace"), ImGuiCond_FirstUseEver);
-        ImGui::SetNextWindowSize(ImVec2(300, 400), ImGuiCond_FirstUseEver);
-        
         ImGui::Begin("Inspector", &showInspector, ImGuiWindowFlags_NoCollapse);
-        
-        ImGui::Text("Current Scene: %s", gameState.currentScenePath.c_str());
+
+        if (!gameState.scene || gameState.selectedObjectID == -1) {
+            ImGui::TextDisabled("Select an entity to view properties");
+            ImGui::End();
+            return;
+        }
+
+        Entity e = (Entity)gameState.selectedObjectID;
+
+        // Editable name
+        if (gameState.scene->names.count(e)) {
+            char buf[64];
+            strncpy(buf, gameState.scene->names[e].c_str(), sizeof(buf));
+            buf[sizeof(buf)-1] = '\0';
+            if (ImGui::InputText("##ename", buf, sizeof(buf)))
+                gameState.scene->names[e] = buf;
+        }
+        ImGui::SameLine();
+        ImGui::TextDisabled("(#%u)", e);
         ImGui::Separator();
-        
-        if (gameState.selectedObjectID == -1) {
-            ImGui::TextDisabled("Select an object to view properties");
-        }
-        else {
-            ImGui::Text("Selected: Object #%d", gameState.selectedObjectID);
-            ImGui::Separator();
-            
-            switch (gameState.selectedObjectID) {
-                case 0: ShowCubeProperties(); break;
-                case 1: ShowLightProperties(); break;
-                case 2: ShowCameraProperties(); break;
-            }
-        }
-        
+
+        ShowProperties(e);
+
         ImGui::End();
     }
 
-    // STATS - Bottom panel showing performance metrics
+    // ── STATS ────────────────────────────────────────────────────────────────
     void ShowStats() {
-        // Fixed: use SetNextWindowDockID() instead of SetNextWindowDocking()
         ImGui::SetNextWindowDockID(ImGui::GetID("MyDockSpace"), ImGuiCond_FirstUseEver);
         ImGui::SetNextWindowSize(ImVec2(400, 150), ImGuiCond_FirstUseEver);
-        
         ImGui::Begin("Stats", &showStats, ImGuiWindowFlags_NoCollapse);
-        
+
         ImGuiIO& io = ImGui::GetIO();
-        
-        // Performance metrics
         ImGui::Text("FPS: %.1f", io.Framerate);
         ImGui::SameLine(150);
         ImGui::Text("Frame Time: %.3f ms", 1000.0f / io.Framerate);
-        
         ImGui::Separator();
-        
-        // Rendering stats
-        ImGui::Text("Vertices: 24");
-        ImGui::SameLine(150);
-        ImGui::Text("Triangles: 12");
-        
-        ImGui::Text("Draw Calls: 2");
-        ImGui::SameLine(150);
-        ImGui::Text("Batches: 1");
-        
+
+        ImGui::Text("Vertices: 24");  ImGui::SameLine(150); ImGui::Text("Triangles: 12");
+        ImGui::Text("Draw Calls: 2"); ImGui::SameLine(150); ImGui::Text("Batches: 1");
+
+        ImGui::Separator();
+        if      (gameState.isPlaying && !gameState.isPaused)
+            ImGui::TextColored(ImVec4(0.2f,1.0f,0.2f,1.0f), "PLAYING");
+        else if (gameState.isPlaying &&  gameState.isPaused)
+            ImGui::TextColored(ImVec4(1.0f,0.8f,0.0f,1.0f), "PAUSED");
+        else
+            ImGui::TextColored(ImVec4(0.5f,0.5f,0.5f,1.0f), "STOPPED");
+
         ImGui::End();
     }
 
-    // ==================== PROPERTY PANELS ====================
+    // ── PROPERTIES ───────────────────────────────────────────────────────────
+    // Only renders components that ALREADY EXIST on the entity.
+    // No component is created or destroyed here.
+    void ShowProperties(Entity e) {
 
-    void ShowCubeProperties() {
-        if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen)) {
-            static float pos[3] = {0.0f, 0.0f, 0.0f};
-            static float rot[3] = {0.0f, 0.0f, 0.0f};
-            static float scale[3] = {1.0f, 1.0f, 1.0f};
-            
-            ImGui::DragFloat3("Position", pos, 0.01f);
-            ImGui::DragFloat3("Rotation", rot, 1.0f);
-            ImGui::DragFloat3("Scale", scale, 0.01f);
+        // Transform — show if scene has it for this entity
+        if (gameState.scene->transforms.count(e)) {
+            auto& t = gameState.scene->transforms[e];
+            if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen)) {
+                ImGui::DragFloat3("Position", &t.position.x, 0.01f);
+                ImGui::DragFloat3("Rotation", &t.rotation.x, 1.0f);
+                ImGui::DragFloat3("Scale",    &t.scale.x,    0.01f);
+                ImGui::Spacing();
+                if (ImGui::SmallButton("Reset")) {
+                    t.position = glm::vec3(0.0f);
+                    t.rotation = glm::vec3(0.0f);
+                    t.scale    = glm::vec3(1.0f);
+                }
+            }
         }
-        
-        if (ImGui::CollapsingHeader("Mesh", ImGuiTreeNodeFlags_DefaultOpen)) {
-            ImGui::Text("Vertices: 24");
-            ImGui::Text("Triangles: 12");
-            ImGui::Text("Material: Default");
-        }
-    }
 
-    void ShowLightProperties() {
-        if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen)) {
-            static float pos[3] = {2.0f, 2.0f, 2.0f};
-            ImGui::DragFloat3("Position##light", pos, 0.01f);
+        // MeshRenderer — show if scene has it for this entity
+        if (gameState.scene->meshRenderers.count(e)) {
+            auto& mr = gameState.scene->meshRenderers[e];
+            if (ImGui::CollapsingHeader("Mesh Renderer", ImGuiTreeNodeFlags_DefaultOpen)) {
+                ImGui::Text("Mesh:     %s", mr.mesh     ? "Assigned" : "None");
+                ImGui::Text("Material: %s", mr.material ? "Assigned" : "None");
+                if (mr.material)
+                    ImGui::ColorEdit3("Color", &mr.material->color.x);
+            }
         }
-        
-        if (ImGui::CollapsingHeader("Light Settings", ImGuiTreeNodeFlags_DefaultOpen)) {
-            static float intensity = 1.0f;
-            static float color[3] = {1.0f, 1.0f, 1.0f};
-            static float range = 10.0f;
-            
-            ImGui::SliderFloat("Intensity", &intensity, 0.0f, 2.0f);
-            ImGui::ColorEdit3("Color##light", color);
-            ImGui::SliderFloat("Range", &range, 0.1f, 100.0f);
-        }
-    }
 
-    void ShowCameraProperties() {
-        if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen)) {
-            static float pos[3] = {0.0f, 2.0f, 5.0f};
-            ImGui::DragFloat3("Position##camera", pos, 0.01f);
-        }
-        
-        if (ImGui::CollapsingHeader("Camera Settings", ImGuiTreeNodeFlags_DefaultOpen)) {
-            static float fov = 60.0f;
-            static float near = 0.1f;
-            static float far = 1000.0f;
-            
-            ImGui::SliderFloat("FOV", &fov, 30.0f, 120.0f);
-            ImGui::DragFloat("Near Plane", &near, 0.01f, 0.001f, 10.0f);
-            ImGui::DragFloat("Far Plane", &far, 1.0f, 10.0f, 10000.0f);
+        // Physics — show if scene has it for this entity
+        if (gameState.scene->physics.count(e)) {
+            auto& ph = gameState.scene->physics[e];
+            if (ImGui::CollapsingHeader("Physics", ImGuiTreeNodeFlags_DefaultOpen)) {
+                ImGui::DragFloat3("Velocity",  &ph.velocity.x, 0.01f);
+            }
         }
     }
 };

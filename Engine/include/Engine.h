@@ -37,49 +37,15 @@
 #include "FileBrowser.h"
 
 #include"transform.h"
+#include"picking.h"
 
 class Engine
 {
 private:
 
-    int height, width;
-
-    const char* title;
-
-    Window* window;
-
-    Shader shader;
-
-    Scene scene;
     
-    Renderer render;
 
-    Camera camera;
-
-    glm::mat4 projection = glm::mat4(1.0f);
-
-    Timer t;
-
-    Deimgui ui;
-
-    PhysicsSystem physics;
-
-
-    std::vector<float> rectVertices = 
-    {
-        -0.5f,  0.5f, 0.0f,  0.0f, 1.0f,
-         0.5f,  0.5f, 0.0f,  1.0f, 1.0f,
-         0.5f, -0.5f, 0.0f,  1.0f, 0.0f,
-        -0.5f, -0.5f, 0.0f,  0.0f, 0.0f
-    };
-
-    std::vector<unsigned int> rectIndices = 
-    {
-        0, 1, 2,
-        2, 3, 0
-    };
-
-    std::vector<float> cubeVertices = {
+        std::vector<float> cubeVertices = {
         -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,  0.0f, 0.0f, 1.0f,
          0.5f,  0.5f,  0.5f,  1.0f, 1.0f,  0.0f, 0.0f, 1.0f,
          0.5f, -0.5f,  0.5f,  1.0f, 0.0f,  0.0f, 0.0f, 1.0f,
@@ -117,13 +83,43 @@ private:
     };
 
     std::vector<unsigned int> cubeIndices = {
-        0,  1,  2,  2,  3,  0,  // Front
-        4,  5,  6,  6,  7,  4,  // Back
-        8,  9, 10, 10, 11,  8,  // Left
-        12, 13, 14, 14, 15, 12,  // Right
-        16, 17, 18, 18, 19, 16,  // Top
-        20, 21, 22, 22, 23, 20,  // Bottom
+        0,  1,  2,  2,  3,  0,  
+        4,  5,  6,  6,  7,  4,  
+        8,  9, 10, 10, 11,  8,  
+        12, 13, 14, 14, 15, 12, 
+        16, 17, 18, 18, 19, 16, 
+        20, 21, 22, 22, 23, 20, 
     };
+
+    int height, width;
+
+    const char* title;
+
+    Window* window;
+
+    Shader shader;
+
+    Renderer render;
+
+    Camera camera;
+
+    glm::mat4 projection = glm::mat4(1.0f);
+
+    Timer t;
+
+    Deimgui ui;
+
+    PhysicsSystem physics;
+
+
+    Mesh cubeMesh;
+
+    Material groundMaterial,playerMaterial;
+    
+                    
+    MeshRendererComponent mr;
+
+
 
     void UpdateSelectedObject();
     void ApplyGameStateLogic();
@@ -132,8 +128,32 @@ public:
     Engine(int w, int h, const char* title);
     ~Engine();
     void shaderInit();
-    void initEverything();
+    void initEverything(Scene& s);
     void loop(Scene &scene);
+
+
+    Entity SpawnCube(Scene& scene,
+                             const std::string& name,
+                             glm::vec3 position,
+                             glm::vec3 color)
+    {
+        Entity e = scene.CreateEntity(name);
+    
+        // Position it
+        scene.transforms[e].position = position;
+    
+        // Wire up renderer — points to Engine-owned mesh and a per-entity material
+        MeshRendererComponent mr;
+        mr.mesh             = &cubeMesh;          // shared mesh, Engine owns it
+        mr.material         = new Material();     // per-entity material
+        mr.material->shader = &shader;     // shared shader, Engine owns it
+        mr.material->color  = color;
+        scene.meshRenderers[e] = mr;
+    
+        return e;
+    }
+
+
 };
 
 Engine::Engine(int w, int h, const char* ti)
@@ -147,12 +167,21 @@ Engine::~Engine()
 }
 
 
-void Engine::initEverything()
+void Engine::initEverything(Scene& s)
 {
 
     render.Init();
 
+
     ui.init(window->GetNativeWindow());
+    
+    std::cout << "Scene pointer: " << &s << std::endl;
+    std::cout << "Entity count: " << s.entities.size() << std::endl;
+    for (Entity e : s.entities) {
+        std::cout << "Entity " << e << " name: " << s.names[e] << std::endl;
+    }
+
+    ui.GetGameState().scene = &s;
     
     // Setup game state callbacks
     
@@ -176,6 +205,12 @@ void Engine::initEverything()
     camera.Position = glm::vec3(0.0f, 2.0f, 5.0f);
     camera.SetProjection(60.0f, 800.0f/600.0f, 0.1f, 1000.0f);
     glViewport(0, 0, width, height);
+
+    cubeMesh.Initc(cubeVertices, cubeIndices);
+
+    shader.Init("Resources/shader.vs", "Resources/shader.fs");
+
+
 
 }
 
@@ -203,6 +238,7 @@ void Engine::ApplyGameStateLogic()
     
     // Handle play/pause/stop states
     if (gameState.isPlaying) {
+
         // Only update simulation if not paused
         if (!gameState.isPaused) {
             // after it works: Update your game objects here
@@ -211,6 +247,8 @@ void Engine::ApplyGameStateLogic()
         } else {
             // Paused - the main simulation will only be paused
             std::cout << "Game paused" << std::endl;
+
+
         }
     } else {
         // Game stopped - reset state
@@ -218,16 +256,23 @@ void Engine::ApplyGameStateLogic()
     }
 }
 
+
 void Engine::loop(Scene &scene)
 {
+    size_t knownEntityCount = scene.entities.size();
+    static Entity selectedEntity = -1;
+
     while (!window->ShouldClose()) {
         
-        render.SetClearColor(0.0f, 1.0f, 0.0f, 1.0f); // bright green
+        render.SetClearColor(1.0f, 1.0f, 1.0f, 0.0f); // bright green
         render.Clear();
 
         float deltaTime = t.Delta();
 
         camera.ProcessKeyboard(window->GetNativeWindow(), deltaTime);
+
+
+        
         glm::mat4 view = camera.GetViewMatrix();
 
         // GAME LOGIC
@@ -236,10 +281,57 @@ void Engine::loop(Scene &scene)
             physics.Update(scene, deltaTime);
 
         }
+        if (scene.entities.size() != knownEntityCount)
+        {
+            for (Entity e : scene.entities)
+            {
+                if (!scene.meshRenderers.count(e))
+                {
+                    mr.mesh             = &cubeMesh;
+                    mr.material         = new Material();
+                    mr.material->shader = &shader;
+                    mr.material->color  = glm::vec3(0.4f, 0.6f, 1.0f); // default blue
+                    scene.meshRenderers[e] = mr;
+                }
+            }
+            knownEntityCount = scene.entities.size();
+        }
+ 
 
 
-        render.Draw(scene,camera);
-       
+
+    static bool wasPressed = false;
+
+    if (glfwGetMouseButton(window->GetNativeWindow(), GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
+    {
+        if (!wasPressed) // fire once per click, not every frame
+        {
+        double mx, my;
+        glfwGetCursorPos(window->GetNativeWindow(), &mx, &my);
+
+        // Don't pick when the mouse is over an ImGui window
+        if (!ImGui::GetIO().WantCaptureMouse)
+        {
+            Ray ray = ScreenToRay(mx, my, width, height, camera.GetViewMatrix(),camera.GetProjection());
+            
+            selectedEntity = PickEntity(ray, scene);
+
+        }
+
+    }
+
+
+    wasPressed = true;
+    }
+    else 
+    {
+         wasPressed = false; 
+    }
+    
+        if (selectedEntity != -1)
+            ui.SetSelectedEntity(selectedEntity);
+        render.Draw(scene,camera,selectedEntity);
+
         // ui rendering one
         ui.newFrame();     
         ui.basic();        
