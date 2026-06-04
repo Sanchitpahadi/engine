@@ -1,53 +1,81 @@
+# Simp
+
+> I really dont know how long will it take but gonna make a engine that gonna help in make simulations of rockets 
+
+---
+
+## ✨ Features
+
+- 🧱 Entity Component System (ECS)
+- 🎮 Real-time rendering pipeline
+- 🎯 Mouse picking (ray casting)
+- 📦 OBJ model loading
+- 🎨 Custom shader system
+- 📷 FPS-style camera
+- 🖥️ ImGui editor UI
+- ⚙️ Basic physics system (WIP)
+
+---
+
+## 🏗️ Architecture
+
+### 🔹 Core Systems
+
+| System        | Description |
+|--------------|------------|
+| Renderer     | Handles OpenGL drawing |
+| Scene        | Manages entities & components |
+| Mesh/Material| Rendering abstraction |
+| Camera       | View & projection control |
+| Physics      | Simulation updates |
+| UI (ImGui)   | Debug tools & editor |
+
+---
+
+## 🎮 Controls
+
+- **W / A / S / D** → Move camera  
+- **Mouse Click** → Select object (ray picking)  
+- **UI Panel** → Scene interaction  
+
+---
+
+## 🛠️ Tech Stack
+
+- C++17+
+- OpenGL
+- GLFW
+- GLAD
+- GLM
+- ImGui
+
+---
+
+## 📂 Project Structure
+Engine/
+├── Renderer/
+├── Physics/
+├── UI/
+├── Utils/
+└── Resources/
 
 
--🧱 Entity Component System (ECS)
--🎮 Real-time rendering pipeline
--🎯 Mouse picking (ray casting)
--📦 OBJ model loading
--🎨 Custom shader system
--📷 Camera system (FPS-style movement)
--🖥️ ImGui-based editor UI
--⚙️ Basic physics system (in progress)# lets create the engine mann
+---
 
-#🏗️ Engine Architecture
 
-The engine is built with a modular structure:
+## 🚧 Future Improvements
 
--Renderer → Handles drawing and OpenGL calls
--Scene System → Manages entities and components
--Mesh / Material → Rendering abstraction
--Camera → View & projection control
--PhysicsSystem → Updates simulation
--UI (ImGui) → Editor tools and debugging
+- 💡 Lighting (Phong / PBR)
+- 🌑 Shadow mapping
+- ⚙️ Better physics
+- 💾 Scene save/load
+- 🚀 GPU optimizations
 
-#🎮 Controls
--W / A / S / D → Move camera
--Mouse Click → Select object (ray picking)
--UI Panel → Scene interaction
+---
 
-#🚀 Getting Started
-Requirements
--C++17+
--OpenGL
--GLFW
--GLAD
--GLM
+## 👨‍💻 Author
 
-#📂 Project Structure
-/Engine
-  ├── Renderer
-  ├── Physics
-  ├── UI
-  └── Utils
-  └──Resources 
-
-#🔮 Future Improvements
--Lighting system (Phong / PBR)
--Shadow mapping
--Better physics integration
--Scene serialization (save/load)
--GPU optimizations
-
-#👨‍💻 Author
-
-Built by a mechanical engineering student exploring graphics, simulation, and engine development.
+Built by a mechanical engineering student exploring:
+- Graphics
+- Simulation
+- Engine development
