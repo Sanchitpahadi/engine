@@ -1,3 +1,0 @@
-/home/dev/project/engine/build/CMakeFiles/cpp.dir
-/home/dev/project/engine/build/CMakeFiles/edit_cache.dir
-/home/dev/project/engine/build/CMakeFiles/rebuild_cache.dir
