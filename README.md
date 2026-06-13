@@ -1,82 +1,124 @@
-# Simp
+# 🚀 Physics Simulation Engine (C++ / OpenGL)
 
-> I really dont know how long will it take but gonna make a engine that gonna help in make simulations of rockets 
+## 📌 Overview
 
----
+This project is a custom-built simulation engine developed from scratch using C++ and OpenGL. It began as an exploration of rendering systems and low-level graphics, and has evolved into a framework for physics-based simulation.
 
-## ✨ Features
-
-- 🧱 Entity Component System (ECS)
-- 🎮 Real-time rendering pipeline
-- 🎯 Mouse picking (ray casting)
-- 📦 OBJ model loading
-- 🎨 Custom shader system
-- 📷 FPS-style camera
-- 🖥️ ImGui editor UI
-- ⚙️ Basic physics system (WIP)
+The goal is to move beyond visual rendering and toward **physically meaningful simulation**, focusing on force-based motion and gravitational systems.
 
 ---
 
-## 🏗️ Architecture
+## 🎯 Current Features
 
-### 🔹 Core Systems
+* Custom rendering pipeline using OpenGL
+* Entity-component style architecture
+* Transform system (position, rotation, scale)
+* Camera system (view + projection)
+* Basic physics system:
 
-| System        | Description |
-|--------------|------------|
-| Renderer     | Handles OpenGL drawing |
-| Scene        | Manages entities & components |
-| Mesh/Material| Rendering abstraction |
-| Camera       | View & projection control |
-| Physics      | Simulation updates |
-| UI (ImGui)   | Debug tools & editor |
-
----
-
-## 🎮 Controls
-
-- **W / A / S / D** → Move camera  
-- **Mouse Click** → Select object (ray picking)  
-- **UI Panel** → Scene interaction  
+  * Mass, velocity, acceleration
+  * Force accumulation
+  * Gravity (inverse-square law)
+* Real-time simulation loop
+* ImGui-based debugging UI
 
 ---
 
-## 🛠️ Tech Stack
+## 🧠 Motivation
 
-- C++17+
-- OpenGL
-- GLFW
-- GLAD
-- GLM
-- ImGui
+Most beginner projects focus only on rendering. This project is built to explore:
 
----
-
-## 📂 Project Structure
-
--Engine/
--├── Renderer/
--├── Physics/
--├── UI/
--├── Utils/
--└── Resources/
-
+* How physical systems are modeled computationally
+* How simulation stability and accuracy affect results
+* How to transition from graphics to engineering-oriented simulations
 
 ---
 
+## ⚙️ Architecture Overview
 
-## 🚧 Future Improvements
+The engine is structured into modular systems:
 
-- 💡 Lighting (Phong / PBR)
-- 🌑 Shadow mapping
-- ⚙️ Better physics
-- 💾 Scene save/load
-- 🚀 GPU optimizations
+* **Scene** → manages entities and components
+* **Transform Component** → spatial data
+* **Renderer** → mesh + shader pipeline
+* **Physics System** → motion and force updates
+* **Camera** → view/projection handling
+* **UI Layer (ImGui)** → debugging and interaction
 
 ---
 
-## 👨‍💻 Author
+## 🔬 Physics Model
 
-Built by a mechanical engineering student exploring:
-- Graphics
-- Simulation
-- Engine development
+The simulation is based on Newtonian mechanics:
+
+**Force:**
+F = m × a
+
+**Gravity:**
+F = G × (m₁ × m₂) / r²
+
+**Integration:**
+
+* Velocity updated from acceleration
+* Position updated from velocity
+
+> Note: This is an early-stage implementation and is being improved for numerical stability.
+
+---
+
+## 🚧 Current Limitations
+
+* Basic integration method (not stable for long-term simulation)
+* Uses float precision (needs double for large-scale systems)
+* No advanced numerical methods yet (e.g., RK4)
+* No real-world validation yet
+
+---
+
+## 🚀 Future Work
+
+* Stable orbital simulation
+* Improved integration techniques
+* Double precision support
+* Multi-body gravitational systems
+* Extension toward engineering simulations
+* Research-oriented development
+
+---
+
+## 🖥️ Build & Run
+
+```bash
+git clone https://github.com/Sanchitpahadi/engine
+cd engine
+
+mkdir build
+cd build
+
+cmake ..
+make
+```
+
+---
+
+## 📊 Vision
+
+This project aims to become a platform for:
+
+* Physics simulation experimentation
+* Bridging graphics and engineering
+* Learning computational modeling from first principles
+
+---
+
+## 🤝 Feedback
+
+This project is actively being developed.
+Suggestions, feedback, and discussions are welcome.
+
+---
+
+## 👤 Author
+
+Sanchit Pahadi
+Kathmandu University
