@@ -11,6 +11,7 @@ Mesh::~Mesh()
     glDeleteBuffers(1, &ebo);
 }
 
+// ============= it just initilized cubes vertices and indices ===============//
 void Mesh::Initc(const std::vector<float>& vertices,
                  const std::vector<unsigned int>& indices)
 {
@@ -20,6 +21,7 @@ void Mesh::Initc(const std::vector<float>& vertices,
 
     vbo.Init(vertices.size() * sizeof(float), vertices.data());
 
+    // i just didnt make a endexBuffer a diffrent file with its code ===== ///
     glGenBuffers(1, &ebo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER,
@@ -42,6 +44,7 @@ void Mesh::Initc(const std::vector<float>& vertices,
     Unbind();
 }
 
+ // =========== Object created in its vertices is handeled by objloader ========///
 void Mesh::Inito(const std::vector<float>& vertices,
            const std::vector<unsigned int>& indices)
 {
@@ -65,12 +68,13 @@ void Mesh::Inito(const std::vector<float>& vertices,
 }
 
 
-
+// ============== BINDS THE MESH ============= //
 void Mesh::Bind() const
 {
     vao.Bind();
 }
 
+// ============= UNbind MEsh ================//
 void Mesh::Unbind() const
 {
     vao.Unbind();

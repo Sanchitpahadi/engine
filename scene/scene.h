@@ -8,6 +8,8 @@
 #include "MeshRendererComponent.h"
 #include "Physics.h"
 
+
+/// ======= implimenting the ECS System its on structure somewhere but its good kind of ====///
 using Entity = uint32_t;
 
 class Scene
@@ -31,7 +33,6 @@ public:
         physics[id] = PhysicsComponent{};
         return id;
     }
-
 
 
     // Destroy entity and all its components

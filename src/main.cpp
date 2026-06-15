@@ -1,5 +1,13 @@
-#include"Engine.h"
+#define STBI_MALLOC(sz) malloc(sz)
+#define STBI_FREE(p) free(p)
+#define STBI_REALLOC(p, sz) realloc(p, sz)
+#define STBI_NO_FAILURE_STRINGS
+#define STBI_NO_SIMD 
+#define STB_IMAGE_IMPLEMENTATION
+#include "std_img.h"
 
+#include"Engine.h"
+#include "sphere.h"
 
 
 int main()
@@ -64,14 +72,21 @@ int main()
         16, 17, 18, 18, 19, 16, 
         20, 21, 22, 22, 23, 20, 
     };
+    
+    std::vector<float>        sphereVerts   = GenerateSphereVertices(36, 18, 1.0f);
+    std::vector<unsigned int> sphereIndices = GenerateSphereIndices(36, 18);
 
     Engine e(1200,800,"SuckMyBrain");
+    glEnable(GL_FRAMEBUFFER_SRGB);
 
     Scene scene;
     
     Mesh cubeMesh;
-
     Material groundMaterial;
+    
+    Mesh sphereMesh;
+    Material sphereMaterial;
+
     
     Shader shader;
 
@@ -80,14 +95,23 @@ int main()
     Entity ground = scene.CreateEntity();
 
 
+    Entity ball = scene.CreateEntity();
+    
+    sphereMaterial.shader = &shader;
+    sphereMaterial.color = glm::vec3(0.2f, 0.6f, 1.0f);  // blue
+
 
     scene.names[ground] = "Ground";
+    scene.names[ball] = "Ball";
+
 
 
     e.initEverything(scene);
 
 
     cubeMesh.Initc(cubeVertices, cubeIndices);
+    sphereMesh.Initc(sphereVerts, sphereIndices);
+
 
     groundMaterial.shader = &shader;
     groundMaterial.color = glm::vec3(1.0f, 1.0f, 0.0f);
@@ -97,12 +121,25 @@ int main()
     scene.transforms[ground] = TransformComponent{};
     scene.meshRenderers[ground] = MeshRendererComponent{};
 
+
+    scene.transforms[ball] = TransformComponent{};
+    scene.meshRenderers[ball] = MeshRendererComponent{};
+
     scene.meshRenderers[ground].mesh = &cubeMesh;
     scene.meshRenderers[ground].material = &groundMaterial;
+
+
+    scene.meshRenderers[ball].mesh = &sphereMesh;
+    scene.meshRenderers[ball].material = &sphereMaterial;
+
     
     // Aplying the initialized material 
     scene.transforms[ground].position = glm::vec3(0.0f, -1.0f, 0.0f);
     scene.transforms[ground].scale = glm::vec3(100.0f, 0.5f, 100.0f);
+
+
+    scene.transforms[ball].position = glm::vec3(0.0f, 1.0f, 0.0f);
+    scene.transforms[ball].scale    = glm::vec3(1.0f, 1.0f, 1.0f);
 
 
     scene.ground = ground;

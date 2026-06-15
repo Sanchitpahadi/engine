@@ -21,6 +21,9 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/src/include
 
     ${CMAKE_SOURCE_DIR}/physics
+       
+    ${CMAKE_SOURCE_DIR}/scene
+
 
 
 )
@@ -30,6 +33,8 @@ set(SOURCES
     Engine/glad.c
     Engine/Window.cpp
     Engine/Camera.cpp
+    Engine/Engine.cpp
+
 
     renderer/Texture.cpp
     renderer/VertexArray.cpp

@@ -7,6 +7,8 @@ class Mesh;
 
 struct MeshRendererComponent
 {
+
     Mesh* mesh = nullptr;
+    
     Material* material = nullptr;
 };
