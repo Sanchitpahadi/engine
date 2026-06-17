@@ -13,7 +13,9 @@
 int main()
  {
 
-    std::vector<float> rectVertices = 
+
+       
+   std::vector<float> rectVertices = 
     {
         -0.5f,  0.5f, 0.0f,  0.0f, 1.0f,
          0.5f,  0.5f, 0.0f,  1.0f, 1.0f,
@@ -72,7 +74,6 @@ int main()
         16, 17, 18, 18, 19, 16, 
         20, 21, 22, 22, 23, 20, 
     };
-    
     std::vector<float>        sphereVerts   = GenerateSphereVertices(36, 18, 1.0f);
     std::vector<unsigned int> sphereIndices = GenerateSphereIndices(36, 18);
 

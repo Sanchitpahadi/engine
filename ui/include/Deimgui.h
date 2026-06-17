@@ -1,65 +1,26 @@
 #pragma once
+#include <Glad/glad.h>
+#include <GLFW/glfw3.h>
 
-#include <string>
-#include <vector>
-#include <iostream>
-#include <functional>
-#include <algorithm>
 
 #include "imgui.h"
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
 
-#include "scene.h"
+#include "GameState.h"
+#include "DockspacePanel.h"
+#include "ToolbarPanel.h"
+#include "HierarchyPanel.h"
+#include "InspectorPanel.h"
+#include "StatsPanel.h"
 
-#include <glm/glm.hpp>
-#include <GLFW/glfw3.h>
-
-// ─────────────────────────────────────────────────────────────────────────────
-// GAME STATE
-// ─────────────────────────────────────────────────────────────────────────────
-struct GameState {
-    Scene* scene = nullptr;
-
-    bool isPlaying        = false;
-    bool isPaused         = false;
-    int  selectedObjectID = -1;
-    std::string currentScenePath = "Untitled";
-
-    std::function<void()> onSave = nullptr;
-    std::function<void()> onLoad = nullptr;
-    std::function<void()> onNew  = nullptr;
-
-    void SaveScene() {
-        std::cout << "[SAVED] Scene: " << currentScenePath << std::endl;
-        if (onSave) onSave();
-    }
-    void LoadScene() {
-        std::cout << "[LOADED] Scene from disk" << std::endl;
-        if (onLoad) onLoad();
-    }
-    void NewScene() {
-        selectedObjectID = -1;
-        currentScenePath = "Untitled";
-        if (onNew) onNew();
-    }
-};
-
-// ─────────────────────────────────────────────────────────────────────────────
 // DEIMGUI
-// ─────────────────────────────────────────────────────────────────────────────
+// Thin orchestrator. Owns all panels and the shared GameState.
+// No UI logic lives here — each panel handles itself.
 class Deimgui
 {
-private:
-    GameState gameState;
-
-    bool showHierarchy = true;
-    bool showInspector = true;
-    bool showStats     = true;
-    bool showToolbar   = true;
-
 public:
-    Deimgui() {}
+    Deimgui() = default;
 
     ~Deimgui() {
         ImGui_ImplOpenGL3_Shutdown();
@@ -67,7 +28,7 @@ public:
         ImGui::DestroyContext();
     }
 
-    // ── INIT ─────────────────────────────────────────────────────────────────
+    //Lifecycle 
     void init(GLFWwindow* win) {
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
@@ -87,12 +48,13 @@ public:
         ImGui::NewFrame();
     }
 
+    // Tick all panels
     void basic() {
-        ShowDockspace();
-        if (showToolbar)   ShowToolbar();
-        if (showHierarchy) ShowHierarchy();
-        if (showInspector) ShowInspector();
-        if (showStats)     ShowStats();
+        dockspace.Show();
+        toolbar  .Show(&gameState);
+        if (hierarchy.show) hierarchy.Show(&gameState);
+        if (inspector.show) inspector.Show(&gameState);
+        if (stats    .show) stats    .Show(&gameState);
     }
 
     void rendering() {
@@ -107,23 +69,20 @@ public:
         }
     }
 
-    // ── PUBLIC ACCESSORS ─────────────────────────────────────────────────────
+    // ── Accessors ─────────────────────────────────────────────────────────
     GameState& GetGameState()        { return gameState; }
     bool IsPlaying()           const { return gameState.isPlaying; }
     bool IsPaused()            const { return gameState.isPaused; }
     int  GetSelectedObjectID() const { return gameState.selectedObjectID; }
-    
-    void SetSelectedEntity(Entity selectedEntity)
-    {
-        gameState.selectedObjectID = selectedEntity;
-    }
-// ─────────────────────────────────────────────────────────────────────────────
+
+    void SetSelectedEntity(Entity e) { gameState.selectedObjectID = (int)e; }
+
 private:
-// ─────────────────────────────────────────────────────────────────────────────
-    void ShowDockspace();
-    void ShowToolbar();
-    void ShowHierarchy();
-    void ShowInspector(); 
-    void ShowStats();
-    void ShowProperties(Entity e);
+    GameState      gameState;
+
+    DockspacePanel dockspace;
+    ToolbarPanel   toolbar;
+    HierarchyPanel hierarchy;
+    InspectorPanel inspector;
+    StatsPanel     stats;
 };

@@ -19,6 +19,7 @@
 
     
 #include"Window.hpp"
+#include"vertices.h"
 #include"Renderer.h"
 #include"Mesh.h"
 #include"Camera.h"
@@ -30,14 +31,41 @@
 
 #include"transform.h"
 #include"picking.h"
+#pragma once
 
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ENGINE
+// Owns the window, renderer, camera, UI, and main loop.
+// All UI panel logic lives in Deimgui + the ui/ folder.
+// ─────────────────────────────────────────────────────────────────────────────
 class Engine
 {
+public:
+    Engine(int w, int h, const char* title);
+    ~Engine();
+
+    void initEverything(Scene& scene);
+    void loop(Scene& scene);
+
 private:
+    //  Core systems 
+       
+   std::vector<float> rectVertices = 
+    {
+        -0.5f,  0.5f, 0.0f,  0.0f, 1.0f,
+         0.5f,  0.5f, 0.0f,  1.0f, 1.0f,
+         0.5f, -0.5f, 0.0f,  1.0f, 0.0f,
+        -0.5f, -0.5f, 0.0f,  0.0f, 0.0f
+    };
 
-    
+    std::vector<unsigned int> rectIndices = 
+    {
+        0, 1, 2,
+        2, 3, 0
+    };
 
-        std::vector<float> cubeVertices = {
+    std::vector<float> cubeVertices = {
         -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,  0.0f, 0.0f, 1.0f,
          0.5f,  0.5f,  0.5f,  1.0f, 1.0f,  0.0f, 0.0f, 1.0f,
          0.5f, -0.5f,  0.5f,  1.0f, 0.0f,  0.0f, 0.0f, 1.0f,
@@ -82,68 +110,23 @@ private:
         16, 17, 18, 18, 19, 16, 
         20, 21, 22, 22, 23, 20, 
     };
-
-    int height, width;
-
+    int   width, height;
     const char* title;
 
-    Window* window;
-
-    Shader shader;
-
-    Renderer render;
-
-    Camera camera;
-
-    glm::mat4 projection = glm::mat4(1.0f);
-
-    Timer t;
-
-    Deimgui ui;
+    Window*   window   = nullptr;
+    Deimgui   ui;
+    Renderer  render;
+    Camera    camera;
+    Timer     t;
 
     PhysicsSystem physics;
 
-
-    Mesh cubeMesh;
-
-    Material groundMaterial,playerMaterial;
-    
-                    
+    // ── Default resources (used when a new entity has no mesh yet) ────────
+    Mesh     cubeMesh;
+    Shader   shader;
     MeshRendererComponent mr;
 
-
-
-    void UpdateSelectedObject();
+    // ── Helpers ───────────────────────────────────────────────────────────
     void ApplyGameStateLogic();
-
-public:
-    Engine(int w, int h, const char* title);
-    ~Engine();
-    void shaderInit();
-    void initEverything(Scene& s);
-    void loop(Scene &scene);
-
-
-    Entity SpawnCube(Scene& scene,
-                             const std::string& name,
-                             glm::vec3 position,
-                             glm::vec3 color)
-    {
-        Entity e = scene.CreateEntity(name);
-    
-        // Position it
-        scene.transforms[e].position = position;
-    
-        // Wire up renderer — points to Engine-owned mesh and a per-entity material
-        MeshRendererComponent mr;
-        mr.mesh             = &cubeMesh;          // shared mesh, Engine owns it
-        mr.material         = new Material();     // per-entity material
-        mr.material->shader = &shader;     // shared shader, Engine owns it
-        mr.material->color  = color;
-        scene.meshRenderers[e] = mr;
-    
-        return e;
-    }
-
-
+    void AutoAssignMesh(Scene& scene, size_t& knownCount);
 };
