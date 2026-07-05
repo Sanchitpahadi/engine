@@ -1,7 +1,8 @@
 #include "Engine.h"
+#include "AssetManager.h"
+#include "SceneSerializer.h"
 #include <iostream>
 
-// ─────────────────────────────────────────────────────────────────────────────
 Engine::Engine(int w, int h, const char* ti)
     : width(w), height(h), title(ti),
       window(new Window(w, h, ti))
@@ -12,9 +13,6 @@ Engine::~Engine()
     delete window;
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// INIT
-// ─────────────────────────────────────────────────────────────────────────────
 void Engine::initEverything(Scene& scene)
 {
     render.Init();
@@ -24,17 +22,28 @@ void Engine::initEverything(Scene& scene)
     ui.GetGameState().scene = &scene;
 
     // Scene operation callbacks
-    ui.GetGameState().onSave = [this]() {
-        std::cout << "[Engine] Saving: " << ui.GetGameState().currentScenePath << "\n";
-        // TODO: implement serialisation
+    ui.GetGameState().onSave = [this, &scene]() {
+        const std::string& path = ui.GetGameState().currentScenePath;
+        std::cout << "[Engine] Saving: " << path << "\n";
+        if (!SceneSerializer::Save(scene, path))
+            std::cout << "[Engine] Save FAILED: " << path << "\n";
     };
-    ui.GetGameState().onLoad = [this]() {
-        std::cout << "[Engine] Loading: " << ui.GetGameState().currentScenePath << "\n";
-        // TODO: implement deserialisation
+    ui.GetGameState().onLoad = [this, &scene]() {
+        const std::string& path = ui.GetGameState().currentScenePath;
+        std::cout << "[Engine] Loading: " << path << "\n";
+        if (!SceneSerializer::Load(scene, path))
+            std::cout << "[Engine] Load FAILED: " << path << "\n";
     };
-    ui.GetGameState().onNew = [this]() {
+    ui.GetGameState().onNew = [this, &scene]() {
         std::cout << "[Engine] New scene\n";
-        // TODO: clear all entity/component data
+        scene.entities.clear();
+        scene.names.clear();
+        scene.transforms.clear();
+        scene.meshRenderers.clear();
+        scene.colliders.clear();
+        scene.physics.clear();
+        scene.orbits.clear();
+        AssetManager::Get().Clear();
     };
 
     // Camera
@@ -45,9 +54,14 @@ void Engine::initEverything(Scene& scene)
     // Default cube mesh + shader used for auto-assigned entities
     cubeMesh.Initc(cubeVertices, cubeIndices);
     shader.Init("Resources/shader.vs", "Resources/shader.fs");
+
+    m_Grid.Init();
+
+    // Asset panel: browses Resources/, spawns .obj files on screen, drives
+    // the same save/load path as the UI's Save/Load buttons.
+    assetPanel.Init("Resources", &shader);
 }
 
-// AUTO-ASSIGN MESH
 // Any entity that appears without a MeshRenderer gets the default cube.
 
 void Engine::AutoAssignMesh(Scene& scene, size_t& knownCount)
@@ -62,6 +76,7 @@ void Engine::AutoAssignMesh(Scene& scene, size_t& knownCount)
             defaultMR.material->shader = &shader;
             defaultMR.material->color  = glm::vec3(0.4f, 0.6f, 1.0f);
             scene.meshRenderers[e]     = defaultMR;
+            scene.colliders[e] = BoxColliderComponent{ glm::vec3(1.0f) };
         }
     }
     knownCount = scene.entities.size();
@@ -83,7 +98,30 @@ void Engine::ApplyGameStateLogic()
     }
 }
 
-// MAIN LOOP
+void Engine::UpdateOrbits(Scene& scene, float totalTime)
+{
+    for (auto& [entity, orbit] : scene.orbits)
+    {
+        if (!scene.transforms.count(orbit.target)) continue; // target was destroyed/missing
+        if (!scene.transforms.count(entity))        continue;
+
+        glm::vec3 targetPos = scene.transforms[orbit.target].position;
+        float angle = totalTime * orbit.speed + orbit.phase;
+
+
+        // Flat orbit around Y axis 
+        glm::vec3 offset(
+            sin(angle) * orbit.radius,
+            0.0f,
+            cos(angle) * orbit.radius
+        );
+
+        scene.transforms[entity].position = targetPos + offset;
+        std::cout << "position.x = " << scene.transforms[entity].position.x << "position.y = " << scene.transforms[entity].position.y<< "position.z = " << scene.transforms[entity].position.z<<std::endl; 
+
+    }
+}
+
 void Engine::loop(Scene& scene)
 {
     size_t knownEntityCount = scene.entities.size();
@@ -97,18 +135,20 @@ void Engine::loop(Scene& scene)
         render.Clear();
 
         float deltaTime = t.Delta();
+        totalTime += deltaTime;
 
         //  Camera 
         camera.ProcessKeyboard(window->GetNativeWindow(), deltaTime);
-
+    AutoAssignMesh(scene, knownEntityCount);
         //  Physics only while playing and not paused
         if (ui.IsPlaying() && !ui.IsPaused())
+        {
             physics.Update(scene, deltaTime);
+            UpdateOrbits(scene, totalTime);
 
-        //  Auto-assign mesh to newly created entities 
-        AutoAssignMesh(scene, knownEntityCount);
+        }        
 
-        //  Mouse picking (one-shot per click, skips ImGui windows) 
+        //  Mouse picking (one-shot per click)
         bool mouseDown = glfwGetMouseButton(window->GetNativeWindow(),
                                             GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS;
         if (mouseDown && !wasMousePressed) {
@@ -126,12 +166,19 @@ void Engine::loop(Scene& scene)
         if (selectedEntity != (Entity)-1)
             ui.SetSelectedEntity(selectedEntity);
 
+
         //  3D render 
         render.Draw(scene, camera, selectedEntity);
-
+        m_Grid.Draw(
+            camera.GetViewMatrix(),
+            camera.GetProjection(),
+            0.1f,    // near — camera
+            1000.0f  // far  — camera
+        );
         //  UI render 
         ui.newFrame();
         ui.basic();
+        assetPanel.Render(scene, selectedEntity);
         ui.rendering();
 
         // Game state side-effects 

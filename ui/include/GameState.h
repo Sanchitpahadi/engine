@@ -6,6 +6,7 @@
 
 #include "scene.h"
 
+
 // GAME STATE — shared across all UI panels
 struct GameState {
     Scene* scene = nullptr;

@@ -1,4 +1,4 @@
-
+#pragma once
 #include"material.h"
 #include "Mesh.h"
 

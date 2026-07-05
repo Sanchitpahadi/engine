@@ -1,3 +1,5 @@
+#pragma once
+
 #include <iostream>
 
 #include "Glad/glad.h" 
@@ -23,7 +25,7 @@
 #include"Renderer.h"
 #include"Mesh.h"
 #include"Camera.h"
-#include"OBJLoader.h"
+#include"ObjLoader.h"
 #include"Deimgui.h"
 #include"scene.h"
 #include "Timer.h"
@@ -31,14 +33,13 @@
 
 #include"transform.h"
 #include"picking.h"
-#pragma once
 
+#include "GridRenderer.h"
 
-// ─────────────────────────────────────────────────────────────────────────────
-// ENGINE
-// Owns the window, renderer, camera, UI, and main loop.
-// All UI panel logic lives in Deimgui + the ui/ folder.
-// ─────────────────────────────────────────────────────────────────────────────
+#include "PhysicsSystem.h"
+
+#include "AssetPanel.h"
+
 class Engine
 {
 public:
@@ -118,15 +119,19 @@ private:
     Renderer  render;
     Camera    camera;
     Timer     t;
+    float totalTime = 0.0f;
 
     PhysicsSystem physics;
 
-    // ── Default resources (used when a new entity has no mesh yet) ────────
     Mesh     cubeMesh;
     Shader   shader;
     MeshRendererComponent mr;
 
-    // ── Helpers ───────────────────────────────────────────────────────────
+    GridRenderer m_Grid;
+
+    AssetPanel assetPanel;
+
     void ApplyGameStateLogic();
     void AutoAssignMesh(Scene& scene, size_t& knownCount);
+    void UpdateOrbits(Scene& scene, float totalTime);
 };

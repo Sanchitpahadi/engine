@@ -19,10 +19,21 @@ include_directories(
 )
 
 set(SOURCES
+
+    imgui/imgui.cpp
+    imgui/imgui_draw.cpp
+    imgui/imgui_tables.cpp
+    imgui/imgui_widgets.cpp
+    imgui/backends/imgui_impl_glfw.cpp
+    imgui/backends/imgui_impl_opengl3.cpp
+
     Engine/glad.c
+
+    Engine/Engine.cpp
     Engine/Window.cpp
     Engine/Camera.cpp
-    Engine/Engine.cpp
+    Engine/AssetManager.cpp
+
   
     renderer/Texture.cpp
     renderer/VertexArray.cpp
@@ -31,7 +42,10 @@ set(SOURCES
     renderer/TextRenderer.cpp
     renderer/Renderer.cpp
     renderer/Mesh.cpp
-    renderer/OBJLoader.cpp
+    renderer/ObjLoader.cpp
+    renderer/GridRenderer.cpp
+
+    
 
     ui/DockspacePanel.cpp
     ui/HierarchyPanel.cpp
@@ -39,16 +53,19 @@ set(SOURCES
     ui/StatsPanel.cpp
     ui/ToolbarPanel.cpp
     ui/FileBrowser.cpp
+    ui/OrbitsPanel.cpp
+    ui/BodiesPanel.cpp
+    ui/AssetPanel.cpp
+    ui/SceneSerializer.cpp
   
-    imgui/imgui.cpp
-    imgui/imgui_draw.cpp
-    imgui/imgui_tables.cpp
-    imgui/imgui_widgets.cpp
-    imgui/backends/imgui_impl_glfw.cpp
-    imgui/backends/imgui_impl_opengl3.cpp
   
     src/main.cpp
-    physics/Physics.cpp
+
+    
+    physics/PhysicsSystem.cpp
+    physics/CollisionSystem.cpp
+
+
 )
 
 add_executable(cpp ${SOURCES})

@@ -13,10 +13,11 @@
 #include "HierarchyPanel.h"
 #include "InspectorPanel.h"
 #include "StatsPanel.h"
+#include "OrbitsPanel.h"
+#include "BodiesPanel.h"
 
 // DEIMGUI
 // Thin orchestrator. Owns all panels and the shared GameState.
-// No UI logic lives here — each panel handles itself.
 class Deimgui
 {
 public:
@@ -54,7 +55,10 @@ public:
         toolbar  .Show(&gameState);
         if (hierarchy.show) hierarchy.Show(&gameState);
         if (inspector.show) inspector.Show(&gameState);
-        if (stats    .show) stats    .Show(&gameState);
+        if (stats.show) stats.Show(&gameState);
+        if (bpanel.show) bpanel.Show(&gameState);
+        if (opanel.show) opanel.Show(&gameState);
+
     }
 
     void rendering() {
@@ -85,4 +89,6 @@ private:
     HierarchyPanel hierarchy;
     InspectorPanel inspector;
     StatsPanel     stats;
+    BodiesPanel    bpanel;
+    OrbitsPanel    opanel;
 };

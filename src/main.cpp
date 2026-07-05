@@ -8,7 +8,16 @@
 
 #include"Engine.h"
 #include "sphere.h"
+#include "PhysicsSystem.h"
 
+struct OrbitParams {
+    Entity entity;
+    float radius;
+    float speed;
+    float phase = 0.0f; // offset so they don't all start aligned
+};
+
+std::vector<OrbitParams> orbits;
 
 int main()
  {
@@ -74,10 +83,11 @@ int main()
         16, 17, 18, 18, 19, 16, 
         20, 21, 22, 22, 23, 20, 
     };
+    
     std::vector<float>        sphereVerts   = GenerateSphereVertices(36, 18, 1.0f);
     std::vector<unsigned int> sphereIndices = GenerateSphereIndices(36, 18);
 
-    Engine e(1200,800,"SuckMyBrain");
+    Engine e(1920,1080,"Suck My Brain");
     glEnable(GL_FRAMEBUFFER_SRGB);
 
     Scene scene;
@@ -95,15 +105,12 @@ int main()
 
     Entity ground = scene.CreateEntity();
 
-
-    Entity ball = scene.CreateEntity();
     
     sphereMaterial.shader = &shader;
     sphereMaterial.color = glm::vec3(0.2f, 0.6f, 1.0f);  // blue
 
 
     scene.names[ground] = "Ground";
-    scene.names[ball] = "Ball";
 
 
 
@@ -123,24 +130,31 @@ int main()
     scene.meshRenderers[ground] = MeshRendererComponent{};
 
 
-    scene.transforms[ball] = TransformComponent{};
-    scene.meshRenderers[ball] = MeshRendererComponent{};
 
     scene.meshRenderers[ground].mesh = &cubeMesh;
     scene.meshRenderers[ground].material = &groundMaterial;
 
 
-    scene.meshRenderers[ball].mesh = &sphereMesh;
-    scene.meshRenderers[ball].material = &sphereMaterial;
-
-    
     // Aplying the initialized material 
     scene.transforms[ground].position = glm::vec3(0.0f, -1.0f, 0.0f);
     scene.transforms[ground].scale = glm::vec3(100.0f, 0.5f, 100.0f);
 
+    Entity sun = scene.CreateEntity("Sun");
+    scene.meshRenderers[sun] = MeshRendererComponent{};
+    scene.meshRenderers[sun].mesh     = &sphereMesh;
+    scene.meshRenderers[sun].material = &sphereMaterial; // give it its own bright material later
+    scene.transforms[sun].position    = glm::vec3(0.0f, 5.0f, 0.0f);
+    scene.transforms[sun].scale       = glm::vec3(2.0f, 2.0f, 2.0f); // bigger ball
+    scene.colliders[ground] = BoxColliderComponent{ glm::vec3(1.0f) };   // <-- add this
+    Entity ball = scene.CreateEntity("Planet");
+    scene.meshRenderers[ball] = MeshRendererComponent{};
+    scene.meshRenderers[ball].mesh     = &sphereMesh;
+    scene.meshRenderers[ball].material = &sphereMaterial;
+    scene.transforms[ball].scale       = glm::vec3(0.5f, 0.5f, 0.5f); // smaller
+    scene.physics[sun].MakeStatic();
+    scene.physics[ground].MakeStatic();
 
-    scene.transforms[ball].position = glm::vec3(0.0f, 1.0f, 0.0f);
-    scene.transforms[ball].scale    = glm::vec3(1.0f, 1.0f, 1.0f);
+    scene.orbits[ball] = OrbitComponent{ sun, 6.0f, 1.0f, 0.0f };
 
 
     scene.ground = ground;
