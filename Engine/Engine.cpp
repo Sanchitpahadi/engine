@@ -169,6 +169,7 @@ void Engine::loop(Scene& scene)
 
         //  3D render 
         render.Draw(scene, camera, selectedEntity);
+        
         m_Grid.Draw(
             camera.GetViewMatrix(),
             camera.GetProjection(),

@@ -28,11 +28,11 @@ public:
     void Bind() const;
     void Unbind() const;
 
-    // ===== it count the index such that for a triangle we need 3 and for square we need 6 =====
+    //it count the index such that for a triangle we need 3 and for square we need 6 
     unsigned int GetIndexCount() const { return indexCount; }
 
     
-    // ======== just to render from mesh which not used yet but to debug or know where the bug is 
+    // just to render from mesh which not used yet but to debug or know where the bug is 
     void Draw() const
      {
           std::cout << "glDrawElements called with: " << GetIndexCount() << std::endl;

@@ -5,7 +5,7 @@
 This project is a custom-built simulation engine developed from scratch using C++ and OpenGL. It began as an exploration of rendering systems and low-level graphics, and has evolved into a framework for physics-based simulation.
 
 The goal is to move beyond visual rendering and toward **physically meaningful simulation**, focusing on force-based motion and gravitational systems.
-
+And will grow more towards a perfect engine for simulation coders.
 ---
 
 ## 🎯 Current Features
