@@ -121,4 +121,3 @@ Suggestions, feedback, and discussions are welcome.
 ## 👤 Author
 
 Sanchit Pahadi
-Kathmandu University
