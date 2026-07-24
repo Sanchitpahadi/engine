@@ -3,7 +3,6 @@
 #include "SceneSerializer.h"
 #include <iostream>
 
-#include "OrbitSystem.h"
 
 Engine::Engine(int w, int h, const char* ti)
     : width(w), height(h), title(ti),
@@ -123,7 +122,6 @@ void Engine::loop(Scene& scene)
         {
             physics.Update(scene, deltaTime);
             orbitSystem.Update(scene, totalTime);
-
         }        
 
         //  Mouse picking (one-shot per click)
@@ -140,11 +138,11 @@ void Engine::loop(Scene& scene)
         wasMousePressed = mouseDown;
 
         if (selectedEntity != (Entity)-1)
+        {
             ui.SetSelectedEntity(selectedEntity);
+        }
 
-
-        //  3D render 
-        render.Draw(scene, camera, selectedEntity);
+        renderSystem.Update(scene,render,camera, selectedEntity);
         m_Grid.Draw(camera.GetViewMatrix(),camera.GetProjection(),0.1f,1000.0f);
         //  UI render 
         ui.newFrame();

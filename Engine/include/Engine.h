@@ -35,10 +35,12 @@
 #include"picking.h"
 
 #include "GridRenderer.h"
-
 #include "PhysicsSystem.h"
-
 #include "AssetPanel.h"
+
+#include "RenderSystem.h"
+#include "OrbitSystem.h"
+
 
 class Engine
 {
@@ -123,6 +125,8 @@ private:
 
     PhysicsSystem physics;
     OrbitSystem orbitSystem;
+
+    RenderSystem renderSystem;
 
     Mesh     cubeMesh;
     Shader   shader;

@@ -50,35 +50,3 @@ void Renderer::Draw(const Mesh& mesh) const
 }
 
 
-void Renderer::Draw(const Scene& scene, const Camera& camera, Entity selectedEntity) const
-{
-    for (const auto& [entity, renderer] : scene.meshRenderers)
-    {
-
-        auto it = scene.transforms.find(entity);
-        if (it == scene.transforms.end())
-            continue;
-
-        const TransformComponent& transform = it->second;
-
-        if (!renderer.mesh || !renderer.material || !renderer.material->shader) {
-            std::cout << "Missing mesh, material, or shader on entity " << entity << "\n";
-            continue;
-        }
-        glm::vec3 originalColor = renderer.material->color;
-
-        if ((int)entity == selectedEntity)
-        {
-            renderer.material->color = glm::vec3(1.0f, 0.5f, 1.0f); // orange
-        }
-        
-
-        renderer.material->Bind(transform.GetMatrix(),camera.GetViewMatrix(),camera.GetProjection());
-        Draw(*renderer.mesh);
-
-        renderer.material->color = originalColor; // orange
-
-
-    }
-}
-
