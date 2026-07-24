@@ -122,6 +122,7 @@ private:
     float totalTime = 0.0f;
 
     PhysicsSystem physics;
+    OrbitSystem orbitSystem;
 
     Mesh     cubeMesh;
     Shader   shader;
@@ -133,5 +134,4 @@ private:
 
     void ApplyGameStateLogic();
     void AutoAssignMesh(Scene& scene, size_t& knownCount);
-    void UpdateOrbits(Scene& scene, float totalTime);
 };

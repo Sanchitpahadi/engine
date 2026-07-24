@@ -3,6 +3,8 @@
 #include "SceneSerializer.h"
 #include <iostream>
 
+#include "OrbitSystem.h"
+
 Engine::Engine(int w, int h, const char* ti)
     : width(w), height(h), title(ti),
       window(new Window(w, h, ti))
@@ -98,30 +100,6 @@ void Engine::ApplyGameStateLogic()
     }
 }
 
-void Engine::UpdateOrbits(Scene& scene, float totalTime)
-{
-    for (auto& [entity, orbit] : scene.orbits)
-    {
-        if (!scene.transforms.count(orbit.target)) continue; // target was destroyed/missing
-        if (!scene.transforms.count(entity))        continue;
-
-        glm::vec3 targetPos = scene.transforms[orbit.target].position;
-        float angle = totalTime * orbit.speed + orbit.phase;
-
-
-        // Flat orbit around Y axis 
-        glm::vec3 offset(
-            sin(angle) * orbit.radius,
-            0.0f,
-            cos(angle) * orbit.radius
-        );
-
-        scene.transforms[entity].position = targetPos + offset;
-        std::cout << "position.x = " << scene.transforms[entity].position.x << "position.y = " << scene.transforms[entity].position.y<< "position.z = " << scene.transforms[entity].position.z<<std::endl; 
-
-    }
-}
-
 void Engine::loop(Scene& scene)
 {
     size_t knownEntityCount = scene.entities.size();
@@ -139,12 +117,12 @@ void Engine::loop(Scene& scene)
 
         //  Camera 
         camera.ProcessKeyboard(window->GetNativeWindow(), deltaTime);
-    AutoAssignMesh(scene, knownEntityCount);
+        AutoAssignMesh(scene, knownEntityCount);
         //  Physics only while playing and not paused
         if (ui.IsPlaying() && !ui.IsPaused())
         {
             physics.Update(scene, deltaTime);
-            UpdateOrbits(scene, totalTime);
+            orbitSystem.Update(scene, totalTime);
 
         }        
 
@@ -155,9 +133,7 @@ void Engine::loop(Scene& scene)
             if (!ImGui::GetIO().WantCaptureMouse) {
                 double mx, my;
                 glfwGetCursorPos(window->GetNativeWindow(), &mx, &my);
-                Ray ray = ScreenToRay(mx, my, width, height,
-                                      camera.GetViewMatrix(),
-                                      camera.GetProjection());
+                Ray ray = ScreenToRay(mx, my, width, height,camera.GetViewMatrix(),camera.GetProjection());
                 selectedEntity = PickEntity(ray, scene);
             }
         }
@@ -169,13 +145,7 @@ void Engine::loop(Scene& scene)
 
         //  3D render 
         render.Draw(scene, camera, selectedEntity);
-        
-        m_Grid.Draw(
-            camera.GetViewMatrix(),
-            camera.GetProjection(),
-            0.1f,    // near — camera
-            1000.0f  // far  — camera
-        );
+        m_Grid.Draw(camera.GetViewMatrix(),camera.GetProjection(),0.1f,1000.0f);
         //  UI render 
         ui.newFrame();
         ui.basic();
