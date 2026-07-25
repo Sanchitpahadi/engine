@@ -123,7 +123,7 @@ private:
     Timer     t;
     float totalTime = 0.0f;
 
-    PhysicsSystem physics;
+    PhysicsSystem physicsSystem;
     OrbitSystem orbitSystem;
 
     RenderSystem renderSystem;
@@ -132,7 +132,6 @@ private:
     Shader   shader;
     MeshRendererComponent mr;
 
-    GridRenderer m_Grid;
 
     AssetPanel assetPanel;
 

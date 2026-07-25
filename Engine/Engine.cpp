@@ -56,8 +56,7 @@ void Engine::initEverything(Scene& scene)
     cubeMesh.Initc(cubeVertices, cubeIndices);
     shader.Init("Resources/shader.vs", "Resources/shader.fs");
 
-    m_Grid.Init();
-
+    renderSystem.Init();
     // Asset panel: browses Resources/, spawns .obj files on screen, drives
     // the same save/load path as the UI's Save/Load buttons.
     assetPanel.Init("Resources", &shader);
@@ -120,7 +119,7 @@ void Engine::loop(Scene& scene)
         //  Physics only while playing and not paused
         if (ui.IsPlaying() && !ui.IsPaused())
         {
-            physics.Update(scene, deltaTime);
+            physicsSystem.Update(scene, deltaTime);
             orbitSystem.Update(scene, totalTime);
         }        
 
@@ -143,7 +142,6 @@ void Engine::loop(Scene& scene)
         }
 
         renderSystem.Update(scene,render,camera, selectedEntity);
-        m_Grid.Draw(camera.GetViewMatrix(),camera.GetProjection(),0.1f,1000.0f);
         //  UI render 
         ui.newFrame();
         ui.basic();

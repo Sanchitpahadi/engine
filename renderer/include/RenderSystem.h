@@ -1,8 +1,14 @@
 #include "scene.h"
+#include "GridRenderer.h"
 
 class RenderSystem
 {
 public:
+    void Init()
+    {
+        m_Grid.Init();
+
+    }
     void Update(const Scene& scene, Renderer& renderer, const Camera& camera, Entity selected)
     {
         for (const auto& [entity, meshRenderer] : scene.meshRenderers)
@@ -26,8 +32,13 @@ public:
             );
 
             renderer.Draw(*meshRenderer.mesh);
+            m_Grid.Draw(camera.GetViewMatrix(),camera.GetProjection(),0.1f,1000.0f);
 
             material->color = originalColor;
         }
     }
+
+private:
+    GridRenderer m_Grid;
+
 };
