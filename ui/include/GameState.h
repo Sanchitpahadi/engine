@@ -5,16 +5,18 @@
 #include <iostream>
 
 #include "scene.h"
+#include "EntityType.h"
 
-
-// GAME STATE — shared across all UI panels
 struct GameState {
     Scene* scene = nullptr;
 
     bool isPlaying        = false;
     bool isPaused         = false;
     int  selectedObjectID = -1;
+
     std::string currentScenePath = "Untitled";
+
+    std::vector<CreateEntityRequest> createRequests; 
 
     std::function<void()> onSave = nullptr;
     std::function<void()> onLoad = nullptr;

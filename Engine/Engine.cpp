@@ -1,6 +1,8 @@
 #include "Engine.h"
 #include "AssetManager.h"
 #include "SceneSerializer.h"
+#include "GameState.h"
+#include "EntityFactory.h"
 #include <iostream>
 
 
@@ -56,30 +58,30 @@ void Engine::initEverything(Scene& scene)
     cubeMesh.Initc(cubeVertices, cubeIndices);
     shader.Init("Resources/shader.vs", "Resources/shader.fs");
 
+    material.shader = &shader;
+
+    DefaultManager::Init(&cubeMesh, 0 , &material);
+
+
     renderSystem.Init();
     // Asset panel: browses Resources/, spawns .obj files on screen, drives
     // the same save/load path as the UI's Save/Load buttons.
     assetPanel.Init("Resources", &shader);
+    resources.Init();
 }
 
-// Any entity that appears without a MeshRenderer gets the default cube.
-
-void Engine::AutoAssignMesh(Scene& scene, size_t& knownCount)
+void Engine::ProcessRequests(GameState& gs)
 {
-    if (scene.entities.size() == knownCount) return;
+    if (!gs.scene) return;
 
-    for (Entity e : scene.entities) {
-        if (!scene.meshRenderers.count(e)) {
-            MeshRendererComponent defaultMR;
-            defaultMR.mesh             = &cubeMesh;
-            defaultMR.material         = new Material();
-            defaultMR.material->shader = &shader;
-            defaultMR.material->color  = glm::vec3(0.4f, 0.6f, 1.0f);
-            scene.meshRenderers[e]     = defaultMR;
-            scene.colliders[e] = BoxColliderComponent{ glm::vec3(1.0f) };
-        }
+    for (auto& req : gs.createRequests)
+    {
+        Entity e = EntityFactory::Create(gs.scene, req);
+
+        gs.selectedObjectID = (int)e;
     }
-    knownCount = scene.entities.size();
+
+    gs.createRequests.clear();
 }
 
 // GAME STATE LOGIC
@@ -115,8 +117,7 @@ void Engine::loop(Scene& scene)
 
         //  Camera 
         camera.ProcessKeyboard(window->GetNativeWindow(), deltaTime);
-        AutoAssignMesh(scene, knownEntityCount);
-        //  Physics only while playing and not paused
+        ProcessRequests(ui.GetGameState());        //  Physics only while playing and not paused
         if (ui.IsPlaying() && !ui.IsPaused())
         {
             physicsSystem.Update(scene, deltaTime);
@@ -124,8 +125,7 @@ void Engine::loop(Scene& scene)
         }        
 
         //  Mouse picking (one-shot per click)
-        bool mouseDown = glfwGetMouseButton(window->GetNativeWindow(),
-                                            GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS;
+        bool mouseDown = glfwGetMouseButton(window->GetNativeWindow(),GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS;
         if (mouseDown && !wasMousePressed) {
             if (!ImGui::GetIO().WantCaptureMouse) {
                 double mx, my;
@@ -142,7 +142,8 @@ void Engine::loop(Scene& scene)
         }
 
         renderSystem.Update(scene,render,camera, selectedEntity);
-        //  UI render 
+
+        // UI Interface and that controls User
         ui.newFrame();
         ui.basic();
         assetPanel.Render(scene, selectedEntity);

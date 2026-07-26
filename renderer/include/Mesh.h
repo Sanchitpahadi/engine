@@ -20,6 +20,8 @@ private:
 public:
      Mesh();
     ~Mesh();
+    Mesh* CreateCubeMesh();
+
     void Initc(const std::vector<float>& vertices,
          const std::vector<unsigned int>& indices);
     

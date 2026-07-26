@@ -38,6 +38,8 @@
 #include "PhysicsSystem.h"
 #include "AssetPanel.h"
 
+#include "ResourceManager.h"
+
 #include "RenderSystem.h"
 #include "OrbitSystem.h"
 
@@ -50,6 +52,7 @@ public:
 
     void initEverything(Scene& scene);
     void loop(Scene& scene);
+    void ProcessRequests(GameState& gs);
 
 private:
     //  Core systems 
@@ -128,6 +131,7 @@ private:
 
     RenderSystem renderSystem;
 
+    Material material;
     Mesh     cubeMesh;
     Shader   shader;
     MeshRendererComponent mr;
@@ -135,6 +139,7 @@ private:
 
     AssetPanel assetPanel;
 
+    ResourceManager resources;
+
     void ApplyGameStateLogic();
-    void AutoAssignMesh(Scene& scene, size_t& knownCount);
 };

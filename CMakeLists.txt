@@ -44,6 +44,7 @@ set(SOURCES
     renderer/Mesh.cpp
     renderer/ObjLoader.cpp
     renderer/GridRenderer.cpp
+    renderer/ResourceManager.cpp
 
     
 

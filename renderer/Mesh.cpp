@@ -29,8 +29,7 @@ void Mesh::Initc(const std::vector<float>& vertices,
                  indices.data(),
                  GL_STATIC_DRAW);
 
-                
-
+    
     layout.push<float>(3);
     layout.push<float>(2);
     layout.push<float>(3);
@@ -79,4 +78,5 @@ void Mesh::Unbind() const
 {
     vao.Unbind();
 }
+
 
