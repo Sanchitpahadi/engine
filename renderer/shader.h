@@ -15,15 +15,7 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
-        /*
-        
-        catch (std::ifstream::failure& e)
-        {
-            std::cout << "ERROR::SHADER::FILE_NOT_SUCCESSFULLY_READ: " 
-            << vertexPath << " | " << fragmentPath << std::endl;
-        }
-        
-        */
+
 class Shader
 {
 public:

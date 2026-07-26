@@ -1,87 +1,69 @@
-cmake_minimum_required(VERSION 3.10)
-project(Game)
+cmake_minimum_required(VERSION 3.16)
+project(Engine)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 include_directories(
-    ${CMAKE_SOURCE_DIR}/dev
-    ${CMAKE_SOURCE_DIR}/imgui
-    ${CMAKE_SOURCE_DIR}/imgui/backends
-    ${CMAKE_SOURCE_DIR}/ui
-    ${CMAKE_SOURCE_DIR}/ui/include
-    ${CMAKE_SOURCE_DIR}/renderer
-    ${CMAKE_SOURCE_DIR}/renderer/include
-    ${CMAKE_SOURCE_DIR}/Engine/include
-    ${CMAKE_SOURCE_DIR}/src/include
-    ${CMAKE_SOURCE_DIR}/physics
-    ${CMAKE_SOURCE_DIR}/scene
+    core
+    assets
+    ECS
+    ECS/Component
+    physics
+    physics/Components
+    renderer
+    renderer/resource
+    scene
+    ui
+    ui/panel
+
+    dev
+    dev/GLFW/include
+    dev/glm
+
+    imgui
 )
 
-set(SOURCES
+file(GLOB_RECURSE SRC
+    core/*.cpp
+    assets/*.cpp
+    ECS/*.cpp
+    physics/*.cpp
+    renderer/*.cpp
+    renderer/resource/*.cpp
+    scene/*.cpp
+    ui/*.cpp
+    ui/panel/*.cpp
+    src/*.cpp
+)
 
+
+set(IMGUI_SRC
     imgui/imgui.cpp
     imgui/imgui_draw.cpp
     imgui/imgui_tables.cpp
     imgui/imgui_widgets.cpp
     imgui/backends/imgui_impl_glfw.cpp
     imgui/backends/imgui_impl_opengl3.cpp
-
-    Engine/glad.c
-
-    Engine/Engine.cpp
-    Engine/Window.cpp
-    Engine/Camera.cpp
-    Engine/AssetManager.cpp
-
-  
-    renderer/Texture.cpp
-    renderer/VertexArray.cpp
-    renderer/VertexBuffer.cpp
-    renderer/VertexBufferLayout.cpp
-    renderer/TextRenderer.cpp
-    renderer/Renderer.cpp
-    renderer/Mesh.cpp
-    renderer/ObjLoader.cpp
-    renderer/GridRenderer.cpp
-    renderer/ResourceManager.cpp
-
-    
-
-    ui/DockspacePanel.cpp
-    ui/HierarchyPanel.cpp
-    ui/InspectorPanel.cpp
-    ui/StatsPanel.cpp
-    ui/ToolbarPanel.cpp
-    ui/FileBrowser.cpp
-    ui/OrbitsPanel.cpp
-    ui/BodiesPanel.cpp
-    ui/AssetPanel.cpp
-    ui/SceneSerializer.cpp
-  
-  
-    src/main.cpp
-
-    
-    physics/PhysicsSystem.cpp
-    physics/CollisionSystem.cpp
-
-
 )
 
-add_executable(cpp ${SOURCES})
+add_executable(engine
+    ${SRC}
+    ${IMGUI_SRC}
+    core/glad.c
+)
 
 find_package(OpenGL REQUIRED)
 find_package(glfw3 REQUIRED)
 
-target_link_libraries(cpp
+target_link_libraries(engine
     OpenGL::GL
     glfw
     dl
 )
 
-add_custom_command(TARGET cpp POST_BUILD
+add_custom_command(TARGET engine POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${CMAKE_SOURCE_DIR}/Resources
-        $<TARGET_FILE_DIR:cpp>/Resources
+    ${CMAKE_SOURCE_DIR}/Resources
+    $<TARGET_FILE_DIR:engine>/Resources
 )

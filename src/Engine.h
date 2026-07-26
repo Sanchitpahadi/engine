@@ -21,7 +21,6 @@
 
     
 #include"Window.hpp"
-#include"vertices.h"
 #include"Renderer.h"
 #include"Mesh.h"
 #include"Camera.h"
