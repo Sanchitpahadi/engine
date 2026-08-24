@@ -1,53 +1,53 @@
-# 🚀 Physics Simulation Engine (C++ / OpenGL)
+# Physics Simulation Engine (C++ / OpenGL)
 
-## 📌 Overview
+## Overview
 
-This project is a custom-built simulation engine developed from scratch using C++ and OpenGL. It began as an exploration of rendering systems and low-level graphics, and has evolved into a framework for physics-based simulation.
+This project is a custom-built simulation engine developed using C++ and OpenGL. It started as a rendering-focused system and is evolving into a framework for physics-based simulation.
 
-The goal is to move beyond visual rendering and toward **physically meaningful simulation**, focusing on force-based motion and gravitational systems.
-And will grow more towards a perfect engine for simulation coders.
+The primary objective is to move from visual rendering toward physically accurate simulation, with emphasis on force-driven motion and gravitational systems.
+
 ---
 
-## 🎯 Current Features
+## Current Features
 
 * Custom rendering pipeline using OpenGL
 * Entity-component style architecture
 * Transform system (position, rotation, scale)
-* Camera system (view + projection)
+* Camera system (view and projection)
 * Basic physics system:
 
   * Mass, velocity, acceleration
   * Force accumulation
   * Gravity (inverse-square law)
 * Real-time simulation loop
-* ImGui-based debugging UI
+* ImGui-based debugging interface
 
 ---
 
-## 🧠 Motivation
+## Motivation
 
-Most beginner projects focus only on rendering. This project is built to explore:
+This project focuses on:
 
-* How physical systems are modeled computationally
-* How simulation stability and accuracy affect results
-* How to transition from graphics to engineering-oriented simulations
-
----
-
-## ⚙️ Architecture Overview
-
-The engine is structured into modular systems:
-
-* **Scene** → manages entities and components
-* **Transform Component** → spatial data
-* **Renderer** → mesh + shader pipeline
-* **Physics System** → motion and force updates
-* **Camera** → view/projection handling
-* **UI Layer (ImGui)** → debugging and interaction
+* Modeling physical systems computationally
+* Understanding simulation accuracy and stability
+* Transitioning from graphics programming to engineering-oriented simulation
 
 ---
 
-## 🔬 Physics Model
+## Architecture Overview
+
+The engine is organized into modular systems:
+
+* **Scene**: Manages entities and components
+* **Transform Component**: Stores spatial data
+* **Renderer**: Handles mesh and shader pipeline
+* **Physics System**: Updates motion and forces
+* **Camera**: Controls view and projection
+* **UI Layer (ImGui)**: Provides debugging tools
+
+---
+
+## Physics Model
 
 The simulation is based on Newtonian mechanics:
 
@@ -59,37 +59,38 @@ F = G × (m₁ × m₂) / r²
 
 **Integration:**
 
-* Velocity updated from acceleration
-* Position updated from velocity
+* Velocity is updated from acceleration
+* Position is updated from velocity
 
-> Note: This is an early-stage implementation and is being improved for numerical stability.
-
----
-
-## 🚧 Current Limitations
-
-* Basic integration method (not stable for long-term simulation)
-* Uses float precision (needs double for large-scale systems)
-* No advanced numerical methods yet (e.g., RK4)
-* No real-world validation yet
+Note: Current implementation is basic and subject to improvement for stability and accuracy.
 
 ---
 
-## 🚀 Future Work
+## Current Limitations
+
+* Basic integration method (not stable for long-term simulations)
+* Uses float precision instead of double
+* No advanced numerical methods (e.g., RK4)
+* No validation against real-world data
+
+---
+
+## Future Work
 
 * Stable orbital simulation
-* Improved integration techniques
+* Improved numerical integration methods
 * Double precision support
 * Multi-body gravitational systems
-* Extension toward engineering simulations
+* Expansion toward engineering simulations
 * Research-oriented development
 
 ---
 
-## 🖥️ Build & Run
+## Build and Run
 
 ```bash
 sudo apt update && sudo apt install -y build-essential cmake libglfw3-dev libgl1-mesa-dev xorg-dev libglew-dev
+
 git clone https://github.com/Sanchitpahadi/engine
 cd engine
 
@@ -102,9 +103,9 @@ make
 
 ---
 
-## 📊 Vision
+## Vision
 
-This project aims to become a platform for:
+The long-term goal is to build a platform for:
 
 * Physics simulation experimentation
 * Bridging graphics and engineering
@@ -112,13 +113,12 @@ This project aims to become a platform for:
 
 ---
 
-## 🤝 Feedback
+## Feedback
 
-This project is actively being developed.
-Suggestions, feedback, and discussions are welcome.
+This project is under active development. Feedback and discussion are encouraged.
 
 ---
 
-## 👤 Author
+## Author
 
 Sanchit Pahadi
