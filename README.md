@@ -89,6 +89,7 @@ F = G × (m₁ × m₂) / r²
 ## 🖥️ Build & Run
 
 ```bash
+sudo apt update && sudo apt install -y build-essential cmake libglfw3-dev libgl1-mesa-dev xorg-dev libglew-dev
 git clone https://github.com/Sanchitpahadi/engine
 cd engine
 
