@@ -8,6 +8,10 @@ The primary objective is to move from visual rendering toward physically accurat
 
 ---
 
+## Main Window
+![Alt Text](Resources/readme/main.png)
+
+---
 ## Current Features
 
 * Custom rendering pipeline using OpenGL
@@ -39,40 +43,19 @@ This project focuses on:
 The engine is organized into modular systems:
 
 * **Scene**: Manages entities and components
-* **Transform Component**: Stores spatial data
-* **Renderer**: Handles mesh and shader pipeline
-* **Physics System**: Updates motion and forces
+* **Transform Component**: Stores spatial data .
+* **Renderer**: Handles mesh and shader pipeline .
+* **Physics System**: Updates physics and simulation .
 * **Camera**: Controls view and projection
 * **UI Layer (ImGui)**: Provides debugging tools
 
 ---
 
-## Physics Model
-
-The simulation is based on Newtonian mechanics:
-
-**Force:**
-F = m × a
-
-**Gravity:**
-F = G × (m₁ × m₂) / r²
-
-**Integration:**
-
-* Velocity is updated from acceleration
-* Position is updated from velocity
-
-Note: Current implementation is basic and subject to improvement for stability and accuracy.
-
----
-
 ## Current Limitations
 
-* Basic integration method (not stable for long-term simulations)
 * Uses float precision instead of double
 * No advanced numerical methods (e.g., RK4)
 * No validation against real-world data
-
 ---
 
 ## Future Work
@@ -102,23 +85,19 @@ make
 ```
 
 ---
-
 ## Vision
-
 The long-term goal is to build a platform for:
 
 * Physics simulation experimentation
 * Bridging graphics and engineering
 * Learning computational modeling from first principles
-
 ---
-
 ## Feedback
-
 This project is under active development. Feedback and discussion are encouraged.
 
 ---
-
 ## Author
-
 Sanchit Pahadi
+---
+sanchit.pahadi4u@gmail.com
+
