@@ -29,7 +29,7 @@ int main()
 
     std::vector<float> rvertices;
     std::vector<unsigned int> rindices;
-    LoadOBJ("Resources/test_cube.obj",rvertices,rindices);
+    LoadOBJ("Resources/test_rocket.obj",rvertices,rindices);
     Scene scene;
     Mesh cubeMesh;
     Material groundMaterial;
@@ -57,7 +57,7 @@ int main()
     rocketMesh.Inito(rvertices,rindices);
     rocketMaterial.shader = &shader;
     scene.transforms[rocket] = TransformComponent{};
-    rocketMaterial.color = glm::vec3(1.0f, 1.0f, 1.0f);
+    rocketMaterial.color = glm::vec3(1.0f, 0.0f, 1.0f);
     scene.meshRenderers[rocket] = MeshRendererComponent{};
     scene.meshRenderers[rocket].mesh     = &rocketMesh;
     scene.meshRenderers[rocket].material = &rocketMaterial; // give it its own bright material later

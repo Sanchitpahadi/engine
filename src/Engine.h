@@ -1,7 +1,5 @@
 #pragma once
-
 #include <iostream>
-
 #include "Glad/glad.h" 
 #include <GLFW/glfw3.h>
 
@@ -18,7 +16,6 @@
 #include "Texture.h"
 #include "TextRenderer.h"
 #include "shader.h"
-
     
 #include"Window.hpp"
 #include"Renderer.h"
