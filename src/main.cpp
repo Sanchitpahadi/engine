@@ -9,15 +9,7 @@
 #include "sphere.h"
 #include "PhysicsSystem.h"
 #include "vertices.h"
-
-struct OrbitParams {
-    Entity entity;
-    float radius;
-    float speed;
-    float phase = 0.0f; // offset so they don't all start aligned
-};
-
-std::vector<OrbitParams>orbits;
+#include "OrbitComponent.h"
 
 int main()
  {
