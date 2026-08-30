@@ -26,14 +26,19 @@ int main()
 
     Engine e(1920,1080,"SANC");
 
-    glEnable(GL_FRAMEBUFFER_SRGB);
 
+    std::vector<float> rvertices;
+    std::vector<unsigned int> rindices;
+    LoadOBJ("Resources/test_cube.obj",rvertices,rindices);
     Scene scene;
     Mesh cubeMesh;
     Material groundMaterial;
     Mesh sphereMesh;
     Material sphereMaterial;
     Shader shader;
+    Mesh rocketMesh;
+    Material rocketMaterial;
+
 
     shader.Init("Resources/shader.vs", "Resources/shader.fs");
 
@@ -42,11 +47,22 @@ int main()
     sphereMaterial.color = glm::vec3(0.2f, 0.6f, 1.0f);  // blue
 
     scene.names[ground] = "Ground";
+    Entity rocket = scene.CreateEntity();
 
     e.initEverything(scene);
 
     cubeMesh.Initc(cubeVertices, cubeIndices);
     sphereMesh.Initc(sphereVerts, sphereIndices);
+
+    rocketMesh.Inito(rvertices,rindices);
+    rocketMaterial.shader = &shader;
+    scene.transforms[rocket] = TransformComponent{};
+    rocketMaterial.color = glm::vec3(1.0f, 1.0f, 1.0f);
+    scene.meshRenderers[rocket] = MeshRendererComponent{};
+    scene.meshRenderers[rocket].mesh     = &rocketMesh;
+    scene.meshRenderers[rocket].material = &rocketMaterial; // give it its own bright material later
+    scene.transforms[rocket].position    = glm::vec3(0.0f, 5.0f, 0.0f);
+    scene.transforms[rocket].scale       = glm::vec3(2.0f, 2.0f, 2.0f); // bigger ball
 
     groundMaterial.shader = &shader;
     groundMaterial.color = glm::vec3(1.0f, 1.0f, 0.0f);

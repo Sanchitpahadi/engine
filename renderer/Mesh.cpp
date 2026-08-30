@@ -57,8 +57,6 @@ void Mesh::Inito(const std::vector<float>& vertices,
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int),indices.data(), GL_STATIC_DRAW);
 
-  
-    
     layout.push<float>(3);
     
     vao.AddBuffer(vbo, layout);
