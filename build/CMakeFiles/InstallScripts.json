@@ -1,0 +1,7 @@
+{
+	"InstallScripts" : 
+	[
+		"/home/sanc/project/engine/build/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

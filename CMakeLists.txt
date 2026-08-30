@@ -16,7 +16,7 @@ include_directories(
     scene
     ui
     ui/panel
-
+    feature/
     dev
     dev/GLFW/include
     dev/glm
