@@ -7,12 +7,19 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 include_directories(
     core
     assets
+    assets/Manager
+    assets/System
     ECS
     ECS/Component
     physics
     physics/Components
     renderer
-    renderer/resource
+    renderer/Opengl/renderer
+    renderer/Opengl/resource
+    renderer/Mesh
+    renderer/Texture
+    renderer/Objloader
+    renderer/Grid
     scene
     ui
     ui/panel
@@ -20,17 +27,22 @@ include_directories(
     dev
     dev/GLFW/include
     dev/glm
-
     imgui
 )
 
 file(GLOB_RECURSE SRC
     core/*.cpp
     assets/*.cpp
+    assets/Manager/*.cpp
+    assets/System/*.cpp
     ECS/*.cpp
     physics/*.cpp
-    renderer/*.cpp
-    renderer/resource/*.cpp
+    renderer/Opengl/renderer/*.cpp
+    renderer/Opengl/resource/*.cpp
+    renderer/Mesh/*.cpp
+    renderer/Texture/*.cpp
+    renderer/Objloader/*.cpp
+    renderer/Grid/*.cpp
     scene/*.cpp
     ui/*.cpp
     ui/panel/*.cpp
