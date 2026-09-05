@@ -142,7 +142,7 @@ void Engine::loop(Scene& scene)
         }
 
         renderSystem.Update(scene,render,camera, selectedEntity);
-
+        iS.Update(window->GetNativeWindow(), deltaTime);
         // UI Interface and that controls User
         ui.newFrame();
         ui.basic();

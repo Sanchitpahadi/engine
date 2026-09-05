@@ -35,7 +35,7 @@
 #include "AssetPanel.h"
 
 #include "ResourceManager.h"
-
+#include "InputSystem.h"
 #include "RenderSystem.h"
 #include "OrbitSystem.h"
 
@@ -125,6 +125,7 @@ private:
     PhysicsSystem physicsSystem;
     OrbitSystem orbitSystem;
 
+    InputSystem iS;
     RenderSystem renderSystem;
 
     Material material;
@@ -136,6 +137,8 @@ private:
     AssetPanel assetPanel;
 
     ResourceManager resources;
+
+
 
     void ApplyGameStateLogic();
 };
