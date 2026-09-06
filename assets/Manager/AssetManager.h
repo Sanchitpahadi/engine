@@ -8,16 +8,18 @@
 #include "shader.h"
 #include "Texture.h"
 
-/* Singleton. Caches meshes and textures by source path so re-loading the
-   same file (e.g. on scene load) doesn't re-parse/re-upload it. Also owns
+/* 
+Singleton. Caches meshes and textures by source path so re-loading the
+same file (e.g. on scene load) doesn't re-parse/re-upload it. Also owns
 Material instances created for spawned/loaded entities so lifetime isn't
-  tied to any one Scene.
+tied to any one Scene.
 */ 
 class AssetManager {
 public:
     static AssetManager& Get();
 
     Mesh*       LoadMesh(const std::string& path);          // cached, loads .obj via ObjLoader
+  
     std::string GetMeshPath(Mesh* mesh) const;              // reverse lookup, used by SceneSerializer
 
     Texture*    LoadTexture(const std::string& path);       // cached, owns the Texture (and its GL handle)

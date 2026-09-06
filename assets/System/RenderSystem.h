@@ -32,10 +32,11 @@ public:
             );
 
             renderer.Draw(*meshRenderer.mesh);
-            m_Grid.Draw(camera.GetViewMatrix(),camera.GetProjection(),0.1f,1000.0f);
 
             material->color = originalColor;
         }
+        m_Grid.Draw(camera.GetViewMatrix(),camera.GetProjection(),0.1f,1000.0f);
+
     }
 
 private:

@@ -11,6 +11,25 @@
 #include "vertices.h"
 #include "OrbitComponent.h"
 
+void Create10KObjects(Scene& scene, Mesh* mesh, Material* material)
+{
+    for (int i = 0; i < 10000; i++)
+    {
+        Entity e = scene.CreateEntity();
+
+        scene.transforms[e] = TransformComponent{};
+        scene.meshRenderers[e] = MeshRendererComponent{};
+
+        scene.meshRenderers[e].mesh = mesh;
+        scene.meshRenderers[e].material = material;
+        float x = (i % 100) * 2.0f;
+        float z = (i / 100) * 2.0f;
+
+        scene.transforms[e].position =
+            glm::vec3(x, 0.0f, z);
+    }
+}
+
 int main()
  {
     Verticese ver;
@@ -20,9 +39,6 @@ int main()
 
     std::vector cubeVertices = ver.cubeVertices;
     std::vector cubeIndices = ver.cubeIndices;
-
-    std::vector<float>        sphereVerts   = GenerateSphereVertices(36, 18, 1.0f);
-    std::vector<unsigned int> sphereIndices = GenerateSphereIndices(36, 18);
 
     Engine e(1920,1080,"SANC");
 
@@ -42,17 +58,25 @@ int main()
 
     shader.Init("Resources/shader.vs", "Resources/shader.fs");
 
+    e.initEverything(scene);
+
+    cubeMesh.Initc(cubeVertices, cubeIndices);
+
+    groundMaterial.shader = &shader;
+    groundMaterial.color = glm::vec3(1.0f, 1.0f, 0.0f);
+/*
+
+    std::vector<float>        sphereVerts   = GenerateSphereVertices(36, 18, 1.0f);
+    std::vector<unsigned int> sphereIndices = GenerateSphereIndices(36, 18);
+    
+    sphereMesh.Initc(sphereVerts, sphereIndices);
+
     Entity ground = scene.CreateEntity();
     sphereMaterial.shader = &shader;
     sphereMaterial.color = glm::vec3(0.2f, 0.6f, 1.0f);  // blue
 
     scene.names[ground] = "Ground";
     Entity rocket = scene.CreateEntity();
-
-    e.initEverything(scene);
-
-    cubeMesh.Initc(cubeVertices, cubeIndices);
-    sphereMesh.Initc(sphereVerts, sphereIndices);
 
     rocketMesh.Inito(rvertices,rindices);
     rocketMaterial.shader = &shader;
@@ -63,9 +87,6 @@ int main()
     scene.meshRenderers[rocket].material = &rocketMaterial; // give it its own bright material later
     scene.transforms[rocket].position    = glm::vec3(0.0f, 5.0f, 0.0f);
     scene.transforms[rocket].scale       = glm::vec3(2.0f, 2.0f, 2.0f); // bigger ball
-
-    groundMaterial.shader = &shader;
-    groundMaterial.color = glm::vec3(1.0f, 1.0f, 0.0f);
 
     // initializing its material and transform material etc
     scene.transforms[ground] = TransformComponent{};
@@ -95,6 +116,9 @@ int main()
 
     scene.orbits[ball] = OrbitComponent{ sun, 6.0f, 1.0f, 0.0f };
     scene.ground = ground;
+*/
+
+    Create10KObjects(scene, &cubeMesh, &groundMaterial);
 
     e.loop(scene);
     return 0;
