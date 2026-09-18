@@ -5,7 +5,7 @@
 This project is a custom-built simulation engine developed using C++ and OpenGL. It started as a rendering-focused system and is evolving into a framework for physics-based simulation.
 
 The primary objective is to move from visual rendering toward
-a Simulation Engine and Game Engine with a best game ever available to play as mechanical or aerospace engineer.
+a Simulation Engine and Game Engine with a best game ever available to play as mechanical or aerospace engineers.
 
 ---
 
